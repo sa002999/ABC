@@ -1,0 +1,82 @@
+/* The footer links anchor the button so it enters view with the dark footer. */
+#home-footer .home-footer-links {
+  width: min(100%, 36rem);
+}
+#home-footer .home-footer-back-top-anchor {
+  position: relative;
+}
+#home-footer .home-footer-back-top {
+  position: absolute;
+  top: -98px;
+  right: 20px;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 2px solid #c4bcac;
+  border-radius: 50%;
+  background: #c4bcac;
+  color: #fff;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background-color 300ms, color 300ms;
+}
+#home-footer .home-footer-back-top::before {
+  content: "";
+  width: 11px;
+  height: 11px;
+  box-sizing: border-box;
+  border-top: 3px solid currentColor;
+  border-right: 3px solid currentColor;
+  transform: translateY(2px) rotate(-45deg);
+}
+#home-footer .home-footer-back-top:hover,
+#home-footer .home-footer-back-top:focus-visible {
+  background: #fff;
+  color: #c4bcac;
+}
+#home-footer .home-footer-back-top:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+@media (min-width: 768px) {
+  #home-footer .home-footer-links { padding-top: 100px; }
+  #home-footer .home-footer-back-top {
+    top: -140px;
+    right: 10px;
+    width: 57px;
+    height: 57px;
+  }
+}
+/* Tablet only; preserve the existing phone and desktop rules. */
+@media (min-width: 768px) and (max-width: 1024px) {
+  #home-footer .home-footer-back-top {
+    top: -130px;
+    right: 20px;
+    width: 46px;
+    height: 46px;
+  }
+}
+/* Larger tablet range only; retain every other breakpoint unchanged. */
+@media (min-width: 1032px) and (max-width: 1376px) {
+  #home-footer .home-footer-back-top {
+    top: -130px;
+    right: 40px;
+    width: 46px;
+    height: 46px;
+  }
+}
+/* Mid-size tablets only; leave phone and existing tablet/desktop rules intact. */
+@media (min-width: 640px) and (max-width: 767px) {
+  #home-footer .home-footer-back-top-anchor {
+    max-width: calc(100vw - 110px);
+  }
+  #home-footer .home-footer-back-top {
+    right: -70px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #home-footer .home-footer-back-top { transition: none; }
+}

@@ -1,0 +1,48 @@
+/* Approved v75 paper texture, shared by the expanded menu on every route. */
+#site-menu.home-menu-texture::after { content: ""; position: absolute; inset: 0; opacity: .12; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E"); }
+#site-menu.home-menu-texture > div { position: relative; z-index: 1; }
+
+/* M8: v75 coral and serif lettering, with the approved 20px size. */
+#site-menu.home-menu-texture .home-menu-number {
+  color: #cb746d;
+  font: 500 20px var(--font-display);
+}
+/* M16: move only the Chinese title, keeping the secondary text in place. */
+#site-menu.home-menu-texture .home-menu-title {
+  display: inline-block;
+  transition: color .25s, transform .25s;
+}
+#site-menu.home-menu-texture nav a:hover .home-menu-title,
+#site-menu.home-menu-texture nav a:focus-visible .home-menu-title {
+  color: #dca0a6;
+  transform: translateX(8px);
+}
+/* M17: replay the entrance each time the native dialog opens. */
+#site-menu.home-menu-texture[open] {
+  animation: menu-v75-fade .35s ease both, menu-v75-slide .45s cubic-bezier(.22,1,.36,1) both;
+}
+#site-menu.home-menu-texture[open]::backdrop {
+  animation: menu-v75-fade .35s ease both;
+}
+@keyframes menu-v75-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes menu-v75-slide {
+  from { transform: translateY(-24px); }
+  to { transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #site-menu.home-menu-texture[open],
+  #site-menu.home-menu-texture[open]::backdrop { animation: none; }
+  #site-menu.home-menu-texture .home-menu-title { transition: none; }
+}
+
+/* Match v75's menu-brand font and native rendering, without inheriting
+   React's page-wide antialiased treatment. */
+#site-menu.home-menu-texture .home-menu-brand {
+  font: 600 19px "Noto Serif TC", "Songti TC", serif;
+  letter-spacing: .2em;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}

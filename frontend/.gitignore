@@ -1,0 +1,9 @@
+# Frontend compiler and test output
+test-results/
+*.tsbuildinfo
+
+# Imported console screenshots and generated browser QA artifacts
+docs/firebase-*.png
+docs/register-ready.png
+docs/qa/*
+!docs/qa/integration-verification.md

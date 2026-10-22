@@ -1,0 +1,30 @@
+.store-city-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 44px;
+  padding: 12px 44px 12px 16px;
+  border: 1px solid var(--color-line);
+  border-radius: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.store-city-toggle svg {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+}
+
+.store-city-toggle:focus-visible {
+  border-color: var(--color-forest);
+}

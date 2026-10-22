@@ -1,0 +1,5 @@
+# Backend packaging and generated verification artifacts
+build/
+wheels/
+*.egg-info
+verification/

@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-19",
+  "timezone": "Asia/Taipei",
+  "build": "npm run build passed (TypeScript + Vite production build)",
+  "unit_tests": {
+    "command": "npm test",
+    "passed": 11,
+    "failed": 0
+  },
+  "browser_evidence": "docs/qa/browser-checks.json",
+  "source_screen_mappings": 54,
+  "asset_files_verified": 26,
+  "original_integrity": {
+    "passed": true,
+    "expected_files": 269,
+    "actual_files": 269,
+    "changed": [],
+    "missing": [],
+    "added": []
+  },
+  "firebase": {
+    "projectId": "kinu-tabi-aa353",
+    "webApp": "KINU TABI React",
+    "email_password_provider_enabled": true,
+    "user_reported_status": "Account created; waiting for verification email"
+  },
+  "backend_configured": false,
+  "live_payment_or_ai_verified": false,
+  "deployed": false,
+  "limitations": "UI migration includes partial admin/editor/photo-library/prebuilt-scene workflows; see integration-status.md. Browser checks do not prove backend correctness or pixel-perfect parity."
+}

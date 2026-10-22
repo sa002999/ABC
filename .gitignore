@@ -1,0 +1,32 @@
+# Local environment and credentials (all packages)
+.env
+.env.*
+!.env.example
+.aws/
+*firebase-adminsdk*.json
+service-account*.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Installed dependencies and generated builds
+node_modules/
+.venv/
+dist/
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local runtime output and OS files
+.cache/
+*.log
+.DS_Store
+Thumbs.db
+
+# irrelevant project files and directories
+wireframes/
+updated-mermaid-diagram-2026-10-16/
+frontend-legacy/

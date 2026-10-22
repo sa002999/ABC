@@ -1,0 +1,133 @@
+[
+  {
+    "source": "kinu-tabi/web/assets/.DS_Store",
+    "target": "public/assets/.DS_Store",
+    "sha256": "1463d758814a55428902aabbffae3bc49940d2481cb17f7dc9566a78454f90fb"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-couple-alpha-mask-desktop.png",
+    "target": "public/assets/kimono-couple-alpha-mask-desktop.png",
+    "sha256": "c9bad87993fa87e5f33cda4a239c9a4967f41515ef44df2bd1daba6b0f205922"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-couple-brush-desktop.png",
+    "target": "public/assets/kimono-couple-brush-desktop.png",
+    "sha256": "72508e2df00189f916f41b6f8a51fdfe5fa36f95596db71e144bb86585669917"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-couple-brush-mobile.png",
+    "target": "public/assets/kimono-couple-brush-mobile.png",
+    "sha256": "1856758c62c1ff8d3325722c4d52511bdeac515d5ce44f07fe20ea2a27974209"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-couple-brush-wide-v2.png",
+    "target": "public/assets/kimono-couple-brush-wide-v2.png",
+    "sha256": "b8dd46f090db0684a17fe5e5deee3ad8b57445ca058cd36952269e5e521fb19e"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-couple-brush-wide-v4.png",
+    "target": "public/assets/kimono-couple-brush-wide-v4.png",
+    "sha256": "49d67b61cf7d8171d313e1571f59ace713566a00956be18049ebb929626f2431"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-couple-brush-wide-v5.png",
+    "target": "public/assets/kimono-couple-brush-wide-v5.png",
+    "sha256": "b7cc8895958b0a8b9f14cc048f2563cd704119548374630d9c917f356349ffff"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-couple.jpg",
+    "target": "public/assets/kimono-couple.jpg",
+    "sha256": "5a44c7bb8040dd426a6d9de1b6686ffebe39f1c51634f980db7ebce8214a9fde"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-friends-brush-desktop.png",
+    "target": "public/assets/kimono-friends-brush-desktop.png",
+    "sha256": "12b54909137bb322d948baeb48262f41f9415f71d808aa8b798b6b0dd1a7d7ed"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-friends-brush-mobile.png",
+    "target": "public/assets/kimono-friends-brush-mobile.png",
+    "sha256": "cfc16e38b310ae2c17ccea27211e22a8ee921c290123d851ccaf93dd356149b2"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-friends.jpg",
+    "target": "public/assets/kimono-friends.jpg",
+    "sha256": "24d725f6164ef99d2bb60bf00a074504997376656a76fd42c96d3f5649ab7a5d"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-portrait-alpha-mask-desktop-mirrored.png",
+    "target": "public/assets/kimono-portrait-alpha-mask-desktop-mirrored.png",
+    "sha256": "7f7be6313efe888a800a2692246742cf93a6f69b30549192edf3a71d0ae23ba1"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-portrait-alpha-mask-desktop.png",
+    "target": "public/assets/kimono-portrait-alpha-mask-desktop.png",
+    "sha256": "5d636e472706249419d1c995258c13696b1c2c66dca3cc7d112648868d5401fa"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-portrait-brush-desktop.png",
+    "target": "public/assets/kimono-portrait-brush-desktop.png",
+    "sha256": "56a0e1d36fdfe134ccd16a8a9dbcc6c6ea2a840e7171d49ac92a02e7c8e9b2f1"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-portrait-brush-mobile.png",
+    "target": "public/assets/kimono-portrait-brush-mobile.png",
+    "sha256": "c03d78e7fd587c3b5dd294d2aff83886c08503ec2dd9ba8895685258a3cb513b"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-portrait.jpg",
+    "target": "public/assets/kimono-portrait.jpg",
+    "sha256": "0c43e82546cfa9f82d5e14d931d5ac35b344edfb9d6f0188d93c6deef9504526"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-red.jpg",
+    "target": "public/assets/kimono-red.jpg",
+    "sha256": "cf6578adbde8a4d9fe6c62697c0a7a0aab02890946b527fa312ed8b82dc1aea5"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-shrine.jpg",
+    "target": "public/assets/kimono-shrine.jpg",
+    "sha256": "487e5dffed6f4717cbafded6a3ab2a6fc9b9ef1b8294fd11d8b87c6b17f2a60f"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kimono-umbrellas.jpg",
+    "target": "public/assets/kimono-umbrellas.jpg",
+    "sha256": "635f2629478af9c8ce2b97ea58db28afbac87651890df13d27673e7baddbac57"
+  },
+  {
+    "source": "kinu-tabi/web/assets/kinu-tabi-brush-wordmark.png",
+    "target": "public/assets/kinu-tabi-brush-wordmark.png",
+    "sha256": "804223e0a70192b3fd057b07a1672e16429551a3ad5c6f85fc350bd81a6ac814"
+  },
+  {
+    "source": "kinu-tabi/web/assets/photo-brush-mask-v2.png",
+    "target": "public/assets/photo-brush-mask-v2.png",
+    "sha256": "487becc224208d51ba3fb3943419895be327e062729eeb58d70e3125677e3c5a"
+  },
+  {
+    "source": "kinu-tabi/web/assets/photo-brush-overlay-v3.png",
+    "target": "public/assets/photo-brush-overlay-v3.png",
+    "sha256": "24f5509e323380d434b45d90204136fb96a412a40c017b38fab67ff81460a93e"
+  },
+  {
+    "source": "kinu-tabi/web/assets/sakura-watercolor.png",
+    "target": "public/assets/sakura-watercolor.png",
+    "sha256": "593a9d39e62a64c5f375c3ae58a392079bc309cab287cd35dfbb7c5514fcf36a"
+  },
+  {
+    "source": "kinu-tabi/web/assets/temple-eave-painted.png",
+    "target": "public/assets/temple-eave-painted.png",
+    "sha256": "a3c9fc48e11b35bcc148b77429cac6806cd54f71f1b4051b8c8afc366d2dcdfe"
+  },
+  {
+    "source": "kinu-tabi/web/assets/vermilion-sun-watercolor-v2.png",
+    "target": "public/assets/vermilion-sun-watercolor-v2.png",
+    "sha256": "4c85f33c434440daaf526d41b5b1e96c63eb48151e4dc48c253506befc79d2b3"
+  },
+  {
+    "kind": "derived",
+    "source": "P_Kinu-Tabi/wireframes/home-2026-10-18-v75-mobile-ipad-mini-sun-left.html (inline paper noise SVG)",
+    "target": "public/assets/paper-grain.svg",
+    "sha256": "943df13912c95ba22fda45ec7854a3bf537b87809e723ea9b1db339e93be6bd3"
+  }
+]

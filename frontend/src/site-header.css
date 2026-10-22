@@ -1,0 +1,29 @@
+/* Shared site header: preserve the approved homepage rules on every route. */
+#home-header {-webkit-font-smoothing:auto;--paper:#f2eee4;--ink:#202522;--muted:#6d6c65;--vermilion:#a64036;--line:rgba(32,37,34,.22);--serif:"Noto Serif TC","Songti TC",serif;--sans:"Noto Sans TC",system-ui,sans-serif;--display:"Playfair Display",var(--serif);}
+#home-header,#home-header *{all:revert;box-sizing:border-box}
+#home-header{font:16px/normal var(--sans);color:var(--ink)}
+#home-header a{color:inherit}
+#home-header button{font:inherit}
+#home-header button,#home-header a{-webkit-tap-highlight-color:transparent}
+#home-header { position: fixed; z-index: 100; top: 0; left: 0; width: 100%; height: 82px; display: flex; align-items: center; justify-content: space-between; padding: 0 4vw; transition: background .35s, height .35s, box-shadow .35s; }#home-header.is-scrolled { height: 68px; background: rgba(242, 238, 228, .92); box-shadow: 0 1px 0 var(--line); backdrop-filter: blur(14px); }#home-header .brand { display: flex; gap: 10.5px; color: var(--ink); text-decoration: none; font: 700 27px/1 var(--serif); letter-spacing: .18em; }#home-header .brand span:last-child { color: var(--vermilion); }#home-header .header-actions { display: flex; align-items: center; gap: 22px; }#home-header .booking-link { min-height: 44px; display: inline-flex; align-items: center; padding: 0 20px; border: 1px solid var(--vermilion); border-radius: 0; color: var(--vermilion); background: transparent; text-decoration: none; letter-spacing: .12em; font-size: 13px; white-space: nowrap; }#home-header .language-toggle, #home-header .menu-trigger, #home-header .menu-close { min-height: 44px; border: 0; color: var(--ink); background: transparent; cursor: pointer; }#home-header .language-toggle { letter-spacing: .08em; }#home-header .language-toggle span:not(.is-active) { color: #8a8983; }#home-header .menu-trigger { display: flex; align-items: center; gap: 10px; }#home-header .menu-label { font-size: 11px; letter-spacing: .18em; }#home-header .menu-icon { width: 28px; height: 16px; display: flex; flex-direction: column; justify-content: center; gap: 7px; }#home-header .menu-icon i { display: block; width: 100%; height: 1px; background: var(--ink); }
+
+
+@media (max-width:720px){
+ #home-header{height:66px;padding:0 20px}
+ #home-header.is-scrolled{height:62px}
+ #home-header .brand{font-size:15px;letter-spacing:.1em}
+ #home-header .booking-link{min-height:40px;padding:0 12px;font-size:11px}
+ #home-header .header-actions{gap:9px}
+ #home-header .menu-label{display:none}
+ #home-header .language-toggle{font-size:11px;padding:0}
+ #home-header .menu-icon{width:25px}
+}
+
+
+#home-header button:focus-visible,#home-header a:focus-visible{outline:2px solid var(--vermilion);outline-offset:4px}
+
+/* Reserve space on interior pages for the same fixed header. */
+.site-header-space { height: 82px; }
+@media (max-width:720px) {
+  .site-header-space { height: 66px; }
+}

@@ -1,0 +1,4176 @@
+[
+  {
+    "id": "home",
+    "group": "公開探索",
+    "name": "首頁",
+    "route": "/",
+    "layout": "landing",
+    "goal": "說明服務、城市與下一步，十秒內找到探索／預約入口。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "品牌主視覺",
+        "lines": [
+          "左：AI 和服體驗預約主張",
+          "東京／京都選擇",
+          "右：人物與街景主視覺位置"
+        ],
+        "actions": [
+          {
+            "label": "探索方案",
+            "target": "plans",
+            "effect": "帶入所選城市"
+          },
+          {
+            "label": "AI 試穿",
+            "target": "tryon",
+            "effect": "帶入試穿入口"
+          },
+          {
+            "label": "立即預約",
+            "target": "booking-store",
+            "effect": "需要時登入，保留原入口"
+          }
+        ],
+        "kind": "image"
+      },
+      {
+        "position": "main",
+        "title": "熱門方案與情境",
+        "lines": [
+          "女性／情侶／親子等方案卡",
+          "方案圖片、包含內容、TWD 起價",
+          "初次體驗／拍照／正式場合入口"
+        ],
+        "actions": [
+          {
+            "label": "查看方案",
+            "target": "detail",
+            "effect": "開啟所選方案"
+          }
+        ],
+        "kind": "cards"
+      },
+      {
+        "position": "right",
+        "title": "體驗方式",
+        "lines": [
+          "選方案→可選 AI 預覽→預約到店",
+          "AI 示意不代表尺寸與實際合身度",
+          "可略過試穿及收藏直接預約"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "下方依序",
+        "lines": [
+          "AI 預覽示範→門市入口→包含與加購→評價素材位置→FAQ 摘要",
+          "評價僅上架已取得授權的真實內容"
+        ],
+        "actions": [
+          {
+            "label": "查看門市",
+            "target": "stores",
+            "effect": "前往門市列表"
+          },
+          {
+            "label": "常見問題",
+            "target": "faq",
+            "effect": "前往 FAQ"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "保留現有首頁品牌方向；線框不取代既有視覺設計",
+      "無預設勾選照片同意，不自動生圖",
+      "頂端語言切換為 11/16 範圍，不冒充期中已完成"
+    ],
+    "api": [
+      "GET /api/plans",
+      "GET /api/stores"
+    ],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "plans",
+    "group": "公開探索",
+    "name": "探索方案",
+    "route": "/plans",
+    "layout": "catalog",
+    "goal": "透過條件找到方案，保留 URL 篩選狀態。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "篩選欄",
+        "lines": [
+          "城市／門市",
+          "同行對象／風格／類型",
+          "預算／包含服務／日期"
+        ],
+        "actions": [
+          {
+            "label": "清除條件",
+            "target": "plans",
+            "effect": "清空篩選但不清會員資料"
+          }
+        ],
+        "kind": "fields"
+      },
+      {
+        "position": "main",
+        "title": "搜尋與方案卡",
+        "lines": [
+          "上方：關鍵字、目前條件、結果數、排序",
+          "下方：圖片、名稱、適用對象、目前 TWD 價與包含內容",
+          "商品／預製穿搭圖切換、配件示意標示"
+        ],
+        "actions": [
+          {
+            "label": "方案詳情",
+            "target": "detail",
+            "effect": "開啟方案"
+          },
+          {
+            "label": "加入收藏",
+            "target": "looks",
+            "effect": "未登入先登入，返回完成收藏"
+          },
+          {
+            "label": "AI 試穿",
+            "target": "tryon",
+            "effect": "帶入商品與方案"
+          }
+        ],
+        "kind": "cards"
+      },
+      {
+        "position": "bottom",
+        "title": "分頁與比較銜接",
+        "lines": [
+          "自動載入更多，保留手動載入備援",
+          "和服比較從本人收藏選 2～3 個方案"
+        ],
+        "actions": [
+          {
+            "label": "載入更多",
+            "target": "",
+            "effect": "讀下一頁，最後一頁停用"
+          },
+          {
+            "label": "到收藏比較",
+            "target": "looks",
+            "effect": "未登入先登入"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "載入中、空結果、失敗重試、最後一頁都需設計",
+      "匿名可瀏覽，收藏／生成／進預約才登入",
+      "不直接從匿名比較籃繞過今日收藏比較規則",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。"
+    ],
+    "api": [
+      "GET /api/plans",
+      "GET /api/stores",
+      "POST /api/looks"
+    ],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "detail",
+    "group": "公開探索",
+    "name": "方案／和服詳情",
+    "route": "/plans/:planId",
+    "layout": "detail",
+    "goal": "看清方案、和服、配件與總價，選擇下一步。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "商品圖片區",
+        "lines": [
+          "大圖：商品圖／同件預製穿搭圖切換",
+          "下方縮圖與已知示意配件標示",
+          "商品圖不是 AI 人物來源照"
+        ],
+        "actions": [
+          {
+            "label": "切換圖片",
+            "target": "",
+            "effect": "只切換展示，不扣生成額度"
+          }
+        ],
+        "kind": "image"
+      },
+      {
+        "position": "right",
+        "title": "方案與搭配選擇",
+        "lines": [
+          "名稱、TWD 方案價、款式（統一尺寸）",
+          "女生僅可選腰帶及其加價；男生無任何可選配件",
+          "配件未選＝0；顯示目前總價",
+          "情侶方案：女生與男生各一件和服，AI 入口提供雙照片上傳位置"
+        ],
+        "actions": [
+          {
+            "label": "加入收藏",
+            "target": "looks",
+            "effect": "保存商品與搭配，可無生成圖"
+          },
+          {
+            "label": "AI 試穿",
+            "target": "tryon",
+            "effect": "帶入搭配後選人物"
+          },
+          {
+            "label": "立即預約",
+            "target": "booking-store",
+            "effect": "登入後帶入所選內容"
+          }
+        ],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "腰帶（女生選用）",
+            "type": "select",
+            "visibleWhen": "selectedGarmentRole === 'FEMALE'",
+            "allowedCategory": "BELT"
+          }
+        ]
+      },
+      {
+        "position": "main",
+        "title": "服務及適用資訊",
+        "lines": [
+          "包含／不包含、適合場合",
+          "門市、可預約日期、體驗及歸還時間",
+          "取消規則與付款成功後保留款式（統一尺寸）"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "外拍與延伸",
+        "lines": [
+          "外拍方案比較入口、相似方案",
+          "女生圖中腰帶可依商品規則標價選用；其他裝飾不提供加購，男生無配件加入按鈕"
+        ],
+        "actions": [
+          {
+            "label": "比較外拍",
+            "target": "photo-compare",
+            "effect": "保留同地點同和服"
+          },
+          {
+            "label": "加入搭配",
+            "target": "",
+            "effect": "更新搭配及價格，不重生",
+            "visibleWhen": "selectedGarmentRole === 'FEMALE' && accessoryCategory === 'BELT'"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "未選示意配件不計價、不保留庫存，除女生腰帶外的裝飾均不能選購",
+      "收藏或生圖不保留商品",
+      "手機底部主 CTA 顯示總價＋立即預約，次操作留內容區",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案為兩名旅客，分別保留兩件和服；女生腰帶獨立關聯，男生無配件；套餐總價不可重複計算。"
+    ],
+    "api": [
+      "GET /api/plans/{planId}",
+      "GET /api/kimonos/{kimonoId}",
+      "GET /api/accessories",
+      "POST /api/looks"
+    ],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）",
+    "garmentPolicy": {
+      "sizeMode": "UNIFORM",
+      "sizeSelection": false,
+      "accessoriesByGarmentRole": {
+        "FEMALE": [
+          "BELT"
+        ],
+        "MALE": []
+      }
+    }
+  },
+  {
+    "id": "photo-compare",
+    "group": "公開探索",
+    "name": "外拍方案比較",
+    "route": "商品／試穿／收藏內的共用畫面，URL 待定",
+    "layout": "compare",
+    "goal": "同地點同和服比較外拍，避免重複選擇或計價。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "共同資訊",
+        "lines": [
+          "門市／城市／和服及目前搭配",
+          "變更和服或地點後重新載入適用方案"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "寺廟方案",
+        "lines": [
+          "場景圖位置",
+          "目前 TWD 總價、包含攝影與輸出",
+          "可預約日期及場次"
+        ],
+        "actions": [
+          {
+            "label": "選寺廟方案",
+            "target": "booking-addons",
+            "effect": "帶入室外及內含服務"
+          }
+        ],
+        "kind": "image"
+      },
+      {
+        "position": "right",
+        "title": "櫻花方案",
+        "lines": [
+          "場景圖位置",
+          "TWD 總價、與寺廟價差",
+          "東京 3/19～4/3；京都 3/24～4/8，依當年開放"
+        ],
+        "actions": [
+          {
+            "label": "選櫻花方案",
+            "target": "booking-addons",
+            "effect": "帶入場景與內含服務"
+          }
+        ],
+        "kind": "image"
+      },
+      {
+        "position": "bottom",
+        "title": "下一步",
+        "lines": [
+          "選定場景不自動生成",
+          "實際攝影與 AI 預覽分開"
+        ],
+        "actions": [
+          {
+            "label": "生成場景預覽",
+            "target": "scene",
+            "effect": "需登入、檢查可用來源後另確認"
+          },
+          {
+            "label": "跳過，直接預約",
+            "target": "booking-store",
+            "effect": "帶入場景與搭配"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "無效日期／額滿組合不可送出",
+      "選定方案已含服務不再重複計價",
+      "比較可匿名；即時生圖及進預約要登入"
+    ],
+    "api": [
+      "GET /api/photography-options",
+      "GET /api/stores/{storeId}/availability"
+    ],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "stores",
+    "group": "公開探索",
+    "name": "門市列表",
+    "route": "/stores",
+    "layout": "catalog",
+    "goal": "依東京／京都選門市。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "城市切換",
+        "lines": [
+          "東京／京都分頁、門市數量"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "門市卡列表",
+        "lines": [
+          "店內照片位置",
+          "地址、交通、營業時間、服務語言"
+        ],
+        "actions": [
+          {
+            "label": "門市詳情",
+            "target": "store-detail",
+            "effect": "帶入門市 ID"
+          },
+          {
+            "label": "以此門市預約",
+            "target": "booking-date",
+            "effect": "登入並帶入門市"
+          }
+        ],
+        "kind": "cards"
+      },
+      {
+        "position": "right",
+        "title": "位置概覽",
+        "lines": [
+          "地圖或位置示意區",
+          "真實地圖實作時載入有授權的資料，不自行假畫地理資訊"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "最近可預約日期是 11/16，期中只提供日期查詢入口",
+      "空資料與載入失敗顯示重試"
+    ],
+    "api": [
+      "GET /api/stores"
+    ],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "store-detail",
+    "group": "公開探索",
+    "name": "門市詳情",
+    "route": "/stores/:storeId",
+    "layout": "detail",
+    "goal": "確認交通、適用方案與時段。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "店內圖片與位置",
+        "lines": [
+          "店內圖片位置",
+          "地址、交通方式、營業時間、服務語言"
+        ],
+        "actions": [
+          {
+            "label": "開啟地圖",
+            "target": "",
+            "effect": "在外部地圖開啟真實地址"
+          }
+        ],
+        "kind": "image"
+      },
+      {
+        "position": "right",
+        "title": "門市資訊與預約",
+        "lines": [
+          "門市特色、適用方案及攝影場景",
+          "日期與公開時段查詢"
+        ],
+        "actions": [
+          {
+            "label": "以此門市預約",
+            "target": "booking-date",
+            "effect": "先登入，保留門市"
+          },
+          {
+            "label": "查看方案",
+            "target": "plans",
+            "effect": "帶入門市篩選"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "到店注意事項",
+        "lines": [
+          "指定門市、本人核對、開始後 30 分鐘含期限內報到",
+          "遲到不順延結束時間"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "日期須在開始前至少 24 小時且未來 90 天內",
+      "不顯示其他會員資料",
+      "最近可預約日期提示留到 11/16"
+    ],
+    "api": [
+      "GET /api/stores/{storeId}",
+      "GET /api/stores/{storeId}/availability"
+    ],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "login",
+    "group": "登入與帳號",
+    "name": "登入",
+    "route": "共用登入畫面／彈窗，URL 待定",
+    "layout": "form",
+    "goal": "登入並回到觸發位置。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "登入表單",
+        "lines": [
+          "Email",
+          "密碼（可切顯示／隱藏）",
+          "錯誤訊息置欄位下方"
+        ],
+        "actions": [
+          {
+            "label": "登入",
+            "target": "account",
+            "effect": "成功回原操作；此處會員頁僅為無原入口示例"
+          },
+          {
+            "label": "建立帳號",
+            "target": "register",
+            "effect": "保留 returnTo 與搭配"
+          },
+          {
+            "label": "忘記密碼",
+            "target": "reset",
+            "effect": "開重設密碼畫面"
+          }
+        ],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "Email",
+            "type": "email"
+          },
+          {
+            "label": "密碼",
+            "type": "password"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "原操作摘要",
+        "lines": [
+          "即將接續：收藏／生成／預約",
+          "已選方案、女生腰帶及場景（男生無配件）"
+        ],
+        "actions": [
+          {
+            "label": "返回瀏覽",
+            "target": "plans",
+            "effect": "取消登入，保留未提交選擇"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "登入不自動生成；生成入口登入後仍需確認",
+      "不用 MCP token 登入網站",
+      "避免把原照片或 token 放進 returnTo 網址",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。"
+    ],
+    "api": [
+      "Firebase Authentication SDK",
+      "PUT /api/account",
+      "GET /api/account"
+    ],
+    "access": "未登入",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "register",
+    "group": "登入與帳號",
+    "name": "註冊",
+    "route": "登入共用畫面的註冊模式，URL 待定",
+    "layout": "form",
+    "goal": "建立 Firebase 帳號並說明 Email 驗證。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "註冊資料",
+        "lines": [
+          "Email",
+          "密碼／確認密碼",
+          "服務條款與隱私說明連結"
+        ],
+        "actions": [
+          {
+            "label": "建立帳號",
+            "target": "verify",
+            "effect": "透過 Firebase 建帳並寄驗證信"
+          },
+          {
+            "label": "已有帳號，登入",
+            "target": "login",
+            "effect": "切換登入模式"
+          }
+        ],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "Email",
+            "type": "email"
+          },
+          {
+            "label": "密碼",
+            "type": "password"
+          },
+          {
+            "label": "確認密碼",
+            "type": "password"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "驗證說明",
+        "lines": [
+          "正式付款與建立 MCP token 前須 Email 驗證",
+          "照片處理同意另外取得，不在註冊時綁定"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "註冊失敗或信箱已使用提供可恢復提示",
+      "不預勾照片、行銷或模型訓練用途"
+    ],
+    "api": [
+      "Firebase Authentication SDK"
+    ],
+    "access": "未登入",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "verify",
+    "group": "登入與帳號",
+    "name": "Email 驗證",
+    "route": "會員／付款／MCP 的共用驗證提示",
+    "layout": "form",
+    "goal": "驗證完成後接續付款或建立 token。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "驗證狀態",
+        "lines": [
+          "遮罩 Email、已寄信提示",
+          "查收信件後重新檢查狀態"
+        ],
+        "actions": [
+          {
+            "label": "重新寄送驗證信",
+            "target": "",
+            "effect": "限頻重寄，不承諾已收信"
+          },
+          {
+            "label": "我已驗證，重新檢查",
+            "target": "booking-review",
+            "effect": "刷新 Firebase 憑證，成功後回原入口"
+          },
+          {
+            "label": "返回會員頁",
+            "target": "account",
+            "effect": "可暫不付款"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "right",
+        "title": "尚未驗證時",
+        "lines": [
+          "暫不能正式付款或建立 token",
+          "登入本身不需要每次收驗證碼"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "驗證失效、寄送中、限頻、成功各有提示",
+      "原入口可能為 MCP，不能一律導向付款"
+    ],
+    "api": [
+      "Firebase Authentication SDK",
+      "GET /api/account"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "reset",
+    "group": "登入與帳號",
+    "name": "忘記／重設密碼",
+    "route": "共用帳號流程，URL 依 Firebase 設定",
+    "layout": "form",
+    "goal": "以安全流程重設 Firebase 密碼。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "重設密碼",
+        "lines": [
+          "Email",
+          "寄信結果／限頻提示"
+        ],
+        "actions": [
+          {
+            "label": "寄出重設信",
+            "target": "",
+            "effect": "由 Firebase 寄送，不暴露帳號是否存在"
+          },
+          {
+            "label": "返回登入",
+            "target": "login",
+            "effect": "回登入模式"
+          }
+        ],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "Email",
+            "type": "email"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "信件開啟後",
+        "lines": [
+          "Firebase 驗證重設連結",
+          "新密碼／確認密碼",
+          "連結過期可重新申請"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "不自行儲存密碼或用 API 改寫驗證狀態"
+    ],
+    "api": [
+      "Firebase Authentication SDK"
+    ],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "tryon",
+    "group": "試穿與收藏",
+    "name": "AI 試穿：人物與搭配",
+    "route": "/try-on",
+    "layout": "detail",
+    "goal": "選本人或商店模特兒，確認搭配再決定是否生成。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "人物來源與照片",
+        "lines": [
+          "單人方案：本人照片／商店模特兒切換",
+          "情侶方案：女生照片、男生照片兩個獨立上傳位置；依角色綁定和服",
+          "各自驗證、替換、刪除；原圖與照片處理同意對應人員",
+          "正面全身、單人、光線、支援格式及保存說明"
+        ],
+        "actions": [
+          {
+            "label": "選擇照片",
+            "target": "",
+            "effect": "取得對應照片當事人同意後，上傳至指定人員欄位；不可覆蓋另一人"
+          },
+          {
+            "label": "選商店模特兒",
+            "target": "",
+            "effect": "不要求本人照片同意"
+          },
+          {
+            "label": "刪除原圖",
+            "target": "",
+            "effect": "另確認，不刪既有生成圖"
+          }
+        ],
+        "kind": "image",
+        "controls": [
+          {
+            "label": "我同意本人照片處理用途",
+            "type": "checkbox",
+            "visibleWhen": "planKind !== 'COUPLE'"
+          },
+          {
+            "label": "人物來源",
+            "type": "select"
+          },
+          {
+            "label": "上傳本人照片",
+            "type": "file",
+            "visibleWhen": "planKind !== 'COUPLE'"
+          },
+          {
+            "label": "女生照片處理同意",
+            "type": "checkbox",
+            "participantRole": "FEMALE",
+            "visibleWhen": "planKind === 'COUPLE'",
+            "consentRequiredFor": "本人照上傳與生成"
+          },
+          {
+            "label": "上傳女生照片",
+            "type": "file",
+            "participantRole": "FEMALE",
+            "visibleWhen": "planKind === 'COUPLE'",
+            "binding": "participants[role].photoId"
+          },
+          {
+            "label": "男生照片處理同意",
+            "type": "checkbox",
+            "participantRole": "MALE",
+            "visibleWhen": "planKind === 'COUPLE'",
+            "consentRequiredFor": "本人照上傳與生成"
+          },
+          {
+            "label": "上傳男生照片",
+            "type": "file",
+            "participantRole": "MALE",
+            "visibleWhen": "planKind === 'COUPLE'",
+            "binding": "participants[role].photoId"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "目前搭配",
+        "lines": [
+          "和服／方案／尺寸",
+          "女生僅可選腰帶；男生無任何可選配件",
+          "目前方案價、各配件加價及總價"
+        ],
+        "actions": [
+          {
+            "label": "更換和服",
+            "target": "plans",
+            "effect": "保留人物來源及可保留搭配"
+          }
+        ],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "和服與方案",
+            "type": "select"
+          },
+          {
+            "label": "腰帶（女生選用）",
+            "type": "select",
+            "visibleWhen": "selectedGarmentRole === 'FEMALE'",
+            "allowedCategory": "BELT"
+          }
+        ]
+      },
+      {
+        "position": "bottom",
+        "title": "生成確認與替代路徑",
+        "lines": [
+          "網站每日共用 5 次；日本午夜重設",
+          "顯示剩餘次數／本人照片同意與本次生成確認分開"
+        ],
+        "actions": [
+          {
+            "label": "確認生成試穿圖",
+            "target": "tryon-working",
+            "effect": "先揭露本次人員、任務與所需額度並確認；單人任務各計 1 次，選腰帶或上傳照片不自動生成"
+          },
+          {
+            "label": "跳過，直接預約",
+            "target": "booking-store",
+            "effect": "不生圖、不必收藏"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "未登入先登入；本人照未同意／不合格不生本人圖",
+      "原圖到刪除或替換前保留；網站生成圖 7 天",
+      "照片失敗可重傳、改模特兒或略過",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案的女生／男生照片、和服與結果分開關聯；替換或刪除其中一人不影響另一人。",
+      "不使用 AI 時可略過兩個上傳欄位；雙人分別生成的提案與額度揭露見最新規則文件，未新增合照生成承諾。"
+    ],
+    "api": [
+      "POST /api/try-on/sessions",
+      "POST .../upload-url",
+      "POST .../validate",
+      "POST .../generations",
+      "GET /api/account/generation-usage"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）",
+    "garmentPolicy": {
+      "sizeMode": "UNIFORM",
+      "sizeSelection": false,
+      "accessoriesByGarmentRole": {
+        "FEMALE": [
+          "BELT"
+        ],
+        "MALE": []
+      }
+    }
+  },
+  {
+    "id": "tryon-working",
+    "group": "試穿與收藏",
+    "name": "AI 生成中",
+    "route": "/try-on 的任務狀態，不新增頁路由",
+    "layout": "detail",
+    "goal": "讓等待有明確狀態，可稍後回來。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "生成預覽區",
+        "lines": [
+          "上傳檢查→排隊→生成",
+          "狀態文字與圖片占位，不虛構精準百分比"
+        ],
+        "actions": [],
+        "kind": "image"
+      },
+      {
+        "position": "right",
+        "title": "任務摘要",
+        "lines": [
+          "人物來源、和服與已選配件",
+          "本次使用 1 次、剩餘額度",
+          "離開頁面不重複送任務"
+        ],
+        "actions": [
+          {
+            "label": "回我的生成圖",
+            "target": "generations",
+            "effect": "從後端找回任務"
+          },
+          {
+            "label": "查看結果",
+            "target": "tryon-result",
+            "effect": "此按鈕在線框中模擬成功狀態"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "生成中禁止重複提交；查詢不扣次",
+      "不提供尚未確定支援的供應商取消任務承諾",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案的女生／男生照片、和服與結果分開關聯；替換或刪除其中一人不影響另一人。"
+    ],
+    "api": [
+      "GET /api/try-on/jobs/{jobId}"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "tryon-result",
+    "group": "試穿與收藏",
+    "name": "AI 試穿結果",
+    "route": "/try-on 的結果狀態",
+    "layout": "detail",
+    "goal": "確認效果、看清圖中配件並接續操作。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "結果圖片",
+        "lines": [
+          "商品／來源／生成圖切換",
+          "AI 效果示意與生成時間、7 天到期時間",
+          "本人形象不自動換成模特兒"
+        ],
+        "actions": [
+          {
+            "label": "切換圖片",
+            "target": "",
+            "effect": "只換展示，不重新生成"
+          }
+        ],
+        "kind": "image"
+      },
+      {
+        "position": "right",
+        "title": "搭配與價格",
+        "lines": [
+          "已選配件、圖中未選示意配件分列",
+          "未選項目標價格及未包含；不計總價"
+        ],
+        "actions": [
+          {
+            "label": "加入搭配",
+            "target": "",
+            "effect": "更新價格，不重新生成",
+            "visibleWhen": "selectedGarmentRole === 'FEMALE' && accessoryCategory === 'BELT'"
+          },
+          {
+            "label": "移除配件",
+            "target": "",
+            "effect": "圖仍有配件時標示未選",
+            "visibleWhen": "selectedGarmentRole === 'FEMALE' && accessoryCategory === 'BELT'"
+          },
+          {
+            "label": "加入收藏",
+            "target": "looks",
+            "effect": "不自動保存，明確點擊才收藏"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "接續操作",
+        "lines": [
+          "網站剩餘額度與結果到期時間"
+        ],
+        "actions": [
+          {
+            "label": "以此搭配預約",
+            "target": "booking-store",
+            "effect": "不必先收藏"
+          },
+          {
+            "label": "選外拍場景",
+            "target": "photo-compare",
+            "effect": "可再次確認生成場景"
+          },
+          {
+            "label": "重新生成",
+            "target": "tryon",
+            "effect": "回確認，不直接扣次"
+          },
+          {
+            "label": "刪除生成圖",
+            "target": "",
+            "effect": "確認後只刪此圖，搭配收藏仍保留"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "失敗／來源失效／額度不足時顯示重傳、改模特兒或跳過預約",
+      "已存收藏修改須另確認更新",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案的女生／男生照片、和服與結果分開關聯；替換或刪除其中一人不影響另一人。"
+    ],
+    "api": [
+      "GET /api/try-on/jobs/{jobId}",
+      "POST /api/looks",
+      "DELETE /api/try-on/generations/{generationId}"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "scene",
+    "group": "試穿與收藏",
+    "name": "外拍場景生成確認",
+    "route": "共用場景預覽面板，URL 待定",
+    "layout": "detail",
+    "goal": "清楚確認來源與本次扣次，並保留略過路徑。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "來源預覽圖＋場景照",
+        "lines": [
+          "人物／同件和服／配件符合性",
+          "有效本人試穿圖或商店預製穿搭圖",
+          "寺廟／櫻花場景位置"
+        ],
+        "actions": [],
+        "kind": "image"
+      },
+      {
+        "position": "right",
+        "title": "場景與示意配件",
+        "lines": [
+          "所選外拍方案、目前總價與已含服務",
+          "僅女生腰帶可選用／移除及計價；男生無配件，其他裝飾只標示意",
+          "來源不可用時顯示需先重新生成穿搭"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "本次確認",
+        "lines": [
+          "本次場景計 1 次，網站與穿搭共用每日 5 次",
+          "若需先生成穿搭，兩個任務分別確認，各 1 次"
+        ],
+        "actions": [
+          {
+            "label": "確認生成場景效果圖",
+            "target": "scene-result",
+            "effect": "來源有效後才可送出"
+          },
+          {
+            "label": "先生成符合搭配的穿搭圖",
+            "target": "tryon",
+            "effect": "無可用來源時先回穿搭確認"
+          },
+          {
+            "label": "跳過，直接預約",
+            "target": "booking-store",
+            "effect": "保留場景及搭配但不扣次"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "來源已失效且本人原圖不存在時先重傳，不擅自換人",
+      "新場景圖 7 天，不延長來源圖期限",
+      "本預覽不是實際攝影檔案下載",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案的女生／男生照片、和服與結果分開關聯；替換或刪除其中一人不影響另一人。"
+    ],
+    "api": [
+      "POST .../jobs/{jobId}/scene-generations",
+      "POST .../sessions/{sessionId}/scene-generations"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "scene-result",
+    "group": "試穿與收藏",
+    "name": "外拍場景結果",
+    "route": "共用場景面板的結果狀態",
+    "layout": "detail",
+    "goal": "看場景效果並把方案帶入後續。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "場景生成圖",
+        "lines": [
+          "人物、和服與場景預覽",
+          "AI 細節可能有偏差",
+          "生成時間及 7 天到期"
+        ],
+        "actions": [],
+        "kind": "image"
+      },
+      {
+        "position": "right",
+        "title": "方案與搭配摘要",
+        "lines": [
+          "已選／未選示意配件",
+          "目前 TWD 方案、配件與總價",
+          "場景及內含攝影服務"
+        ],
+        "actions": [
+          {
+            "label": "加入收藏",
+            "target": "looks",
+            "effect": "由使用者明確保存"
+          },
+          {
+            "label": "更新原收藏",
+            "target": "looks",
+            "effect": "僅從既有收藏進入時顯示，確認後更新"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "接續操作",
+        "lines": [
+          "不收藏仍可預約"
+        ],
+        "actions": [
+          {
+            "label": "以此方案預約",
+            "target": "booking-store",
+            "effect": "保留和服、配件及場景"
+          },
+          {
+            "label": "更換場景",
+            "target": "photo-compare",
+            "effect": "不自動再次生成"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "失敗與額度不足仍可跳過進預約",
+      "不把 MCP 當日圖片加入網站收藏",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案的女生／男生照片、和服與結果分開關聯；替換或刪除其中一人不影響另一人。"
+    ],
+    "api": [
+      "GET /api/try-on/jobs/{jobId}",
+      "POST/PATCH /api/looks"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "generations",
+    "group": "試穿與收藏",
+    "name": "我的生成圖",
+    "route": "會員內的生成圖分頁，獨立 URL 待定",
+    "layout": "catalog",
+    "goal": "找到尚有效的生成結果並分別管理圖片。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "額度與期限",
+        "lines": [
+          "網站 5 次／MCP 3 次分開",
+          "日本時間與重設時間",
+          "網站結果保留 7 天"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "網站生成圖列表",
+        "lines": [
+          "圖片、任務狀態、和服、生成／到期時間",
+          "生成中可重查，失敗保留搭配"
+        ],
+        "actions": [
+          {
+            "label": "開啟結果",
+            "target": "tryon-result",
+            "effect": "看此任務"
+          },
+          {
+            "label": "加入收藏",
+            "target": "looks",
+            "effect": "保存選定搭配"
+          },
+          {
+            "label": "刪除生成圖",
+            "target": "",
+            "effect": "只刪圖片，不刪收藏"
+          }
+        ],
+        "kind": "cards"
+      },
+      {
+        "position": "right",
+        "title": "原始照片管理",
+        "lines": [
+          "目前本人原圖與處理同意狀態",
+          "刪除原圖不連動既有生成圖"
+        ],
+        "actions": [
+          {
+            "label": "替換照片",
+            "target": "tryon",
+            "effect": "重新上傳與確認同意"
+          },
+          {
+            "label": "刪原圖",
+            "target": "",
+            "effect": "確認原圖刪除後無法供後續生成"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "MCP 當日結果不混成網站 7 天圖庫",
+      "空列表顯示選商品／開始試穿",
+      "原圖、生成圖與收藏三種刪除分開",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案的女生／男生照片、和服與結果分開關聯；替換或刪除其中一人不影響另一人。"
+    ],
+    "api": [
+      "GET /api/try-on/generations",
+      "GET /api/try-on/sessions",
+      "GET /api/account/generation-usage"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "looks",
+    "group": "試穿與收藏",
+    "name": "我的造型收藏",
+    "route": "/looks",
+    "layout": "catalog",
+    "goal": "管理搭配、比較方案或直接預約。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "收藏總覽",
+        "lines": [
+          "目前收藏數／可選 2～3 個不同和服方案比較",
+          "收藏不代表庫存已保留"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "收藏卡片",
+        "lines": [
+          "有效生成圖優先，原商品圖可切換",
+          "無圖或到期改商品圖，標示原因",
+          "和服（統一尺寸）／已選配件／場景／目前 TWD 價"
+        ],
+        "actions": [
+          {
+            "label": "以此造型預約",
+            "target": "booking-store",
+            "effect": "帶入資料，付款前重驗"
+          },
+          {
+            "label": "編輯搭配",
+            "target": "detail",
+            "effect": "保留 lookId，更新需確認"
+          },
+          {
+            "label": "外拍場景",
+            "target": "photo-compare",
+            "effect": "不必重新挑和服"
+          },
+          {
+            "label": "取消收藏",
+            "target": "",
+            "effect": "只移除此收藏，不刪圖"
+          }
+        ],
+        "kind": "cards"
+      },
+      {
+        "position": "bottom",
+        "title": "比較選取列",
+        "lines": [
+          "已選縮圖與移除，至少 2 個才能比較，最多 3 個"
+        ],
+        "actions": [
+          {
+            "label": "比較所選方案",
+            "target": "looks-compare",
+            "effect": "少於 2 個停用"
+          },
+          {
+            "label": "瀏覽更多方案",
+            "target": "plans",
+            "effect": "收藏空白時作主要入口"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "不顯示收藏當時價格或新舊價差",
+      "跨裝置同步、修改原收藏需確認",
+      "圖到期仍保留搭配，未選示意配件不誤計價",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案為兩名旅客，分別保留兩件和服；女生腰帶獨立關聯，男生無配件；套餐總價不可重複計算。",
+      "情侶方案的女生／男生照片、和服與結果分開關聯；替換或刪除其中一人不影響另一人。"
+    ],
+    "api": [
+      "GET/POST/PATCH/DELETE /api/looks"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "looks-compare",
+    "group": "試穿與收藏",
+    "name": "和服方案比較",
+    "route": "/looks/compare；/plans/compare 使用相同內容",
+    "layout": "compare",
+    "goal": "以相同欄位比較 2～3 份本人收藏搭配。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "共同操作",
+        "lines": [
+          "已選 2～3 個不同和服方案",
+          "每欄可移除，少於 2 個提示重新選擇"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "方案 A",
+        "lines": [
+          "圖片／和服類型／適合場合",
+          "目前方案價／各配件加價／總價",
+          "包含內容與適用門市"
+        ],
+        "actions": [
+          {
+            "label": "選這套預約",
+            "target": "booking-store",
+            "effect": "帶入 A 的完整搭配"
+          }
+        ],
+        "kind": "image"
+      },
+      {
+        "position": "right",
+        "title": "方案 B／C",
+        "lines": [
+          "相同欄位對齊",
+          "無生成圖用商品圖",
+          "不比較歷史價格"
+        ],
+        "actions": [
+          {
+            "label": "選這套外拍",
+            "target": "photo-compare",
+            "effect": "同地點同和服比較外拍"
+          }
+        ],
+        "kind": "image"
+      },
+      {
+        "position": "bottom",
+        "title": "返回收藏",
+        "lines": [
+          "手機改為各方案縱向卡片，仍可看所有欄位"
+        ],
+        "actions": [
+          {
+            "label": "回收藏",
+            "target": "looks",
+            "effect": "保留仍有效的比較選擇"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "第三欄只在選 3 套時出現，不虛構商品資料",
+      "比較不保留庫存，價格付款前重驗",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案為兩名旅客，分別保留兩件和服；女生腰帶獨立關聯，男生無配件；套餐總價不可重複計算。"
+    ],
+    "api": [
+      "POST /api/plans/compare"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "booking-store",
+    "group": "預約與付款",
+    "name": "預約 1／7：地區與門市",
+    "route": "/booking 的步驟狀態",
+    "layout": "form",
+    "goal": "完成地區與門市，所有步驟返回不丟資料。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "預約進度",
+        "lines": [
+          "1 門市 → 2 日期 → 3 旅客 → 4 搭配 → 5 加購 → 6 聯絡 → 7 確認"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "門市可選卡片",
+        "lines": [
+          "城市：東京／京都",
+          "門市：交通、服務語言、方案適用性"
+        ],
+        "actions": [],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "城市",
+            "type": "select"
+          },
+          {
+            "label": "門市",
+            "type": "select"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "整筆預約摘要",
+        "lines": [
+          "目前門市、日本日期時段",
+          "人數與各旅客所選搭配",
+          "TWD 方案／配件／攝影／優惠／總計",
+          "此時草稿不保留庫存"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "步驟操作",
+        "lines": [
+          "離開後可恢復未過期草稿；MCP 草稿進入須驗本人擁有權"
+        ],
+        "actions": [
+          {
+            "label": "上一步",
+            "target": "detail",
+            "effect": "保留已填資料"
+          },
+          {
+            "label": "下一步",
+            "target": "booking-date",
+            "effect": "欄位有效並保存草稿後繼續"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "全員資源不足整筆拒絕，不能部分成立",
+      "變更門市／時段重驗所有方案與人員名額",
+      "未生成／未收藏也可正常完成此步",
+      "手機摘要置主表單後，可收合明細，付款總額與主按鈕維持可見"
+    ],
+    "api": [
+      "GET /api/stores"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "booking-date",
+    "group": "預約與付款",
+    "name": "預約 2／7：日期與時段",
+    "route": "/booking 的步驟狀態",
+    "layout": "form",
+    "goal": "完成日期與時段，所有步驟返回不丟資料。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "預約進度",
+        "lines": [
+          "1 門市 → 2 日期 → 3 旅客 → 4 搭配 → 5 加購 → 6 聯絡 → 7 確認"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "日期與場次欄位",
+        "lines": [
+          "日期選擇器",
+          "日本時間場次、全員可用／額滿／休店",
+          "開始前至少 24 小時，最遠未來 90 天"
+        ],
+        "actions": [],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "預約日期（日本時間）",
+            "type": "date"
+          },
+          {
+            "label": "可用場次",
+            "type": "select"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "整筆預約摘要",
+        "lines": [
+          "目前門市、日本日期時段",
+          "人數與各旅客所選搭配",
+          "TWD 方案／配件／攝影／優惠／總計",
+          "此時草稿不保留庫存"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "步驟操作",
+        "lines": [
+          "離開後可恢復未過期草稿；MCP 草稿進入須驗本人擁有權"
+        ],
+        "actions": [
+          {
+            "label": "上一步",
+            "target": "booking-store",
+            "effect": "保留已填資料"
+          },
+          {
+            "label": "下一步",
+            "target": "booking-guests",
+            "effect": "欄位有效並保存草稿後繼續"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "全員資源不足整筆拒絕，不能部分成立",
+      "變更門市／時段重驗所有方案與人員名額",
+      "未生成／未收藏也可正常完成此步",
+      "手機摘要置主表單後，可收合明細，付款總額與主按鈕維持可見"
+    ],
+    "api": [
+      "GET /api/stores/{storeId}/availability"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "booking-guests",
+    "group": "預約與付款",
+    "name": "預約 3／7：旅客人數",
+    "route": "/booking 的步驟狀態",
+    "layout": "form",
+    "goal": "完成旅客人數，所有步驟返回不丟資料。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "預約進度",
+        "lines": [
+          "1 門市 → 2 日期 → 3 旅客 → 4 搭配 → 5 加購 → 6 聯絡 → 7 確認"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "旅客卡片",
+        "lines": [
+          "1～3 位旅客；每位旅客類型",
+          "達 3 人停用新增，移除時重計優惠",
+          "所有人共用門市、日期與時段"
+        ],
+        "actions": [],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "旅客人數：1～3 人",
+            "type": "select"
+          },
+          {
+            "label": "旅客類型",
+            "type": "select"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "整筆預約摘要",
+        "lines": [
+          "目前門市、日本日期時段",
+          "人數與各旅客所選搭配",
+          "TWD 方案／配件／攝影／優惠／總計",
+          "此時草稿不保留庫存"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "步驟操作",
+        "lines": [
+          "離開後可恢復未過期草稿；MCP 草稿進入須驗本人擁有權"
+        ],
+        "actions": [
+          {
+            "label": "新增旅客",
+            "target": "",
+            "effect": "最多 3 人，達上限停用"
+          },
+          {
+            "label": "移除旅客",
+            "target": "",
+            "effect": "保留至少 1 人，移除後重算總價與團體優惠"
+          },
+          {
+            "label": "上一步",
+            "target": "booking-date",
+            "effect": "保留已填資料"
+          },
+          {
+            "label": "下一步",
+            "target": "booking-outfits",
+            "effect": "欄位有效並保存草稿後繼續"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "全員資源不足整筆拒絕，不能部分成立",
+      "變更門市／時段重驗所有方案與人員名額",
+      "未生成／未收藏也可正常完成此步",
+      "手機摘要置主表單後，可收合明細，付款總額與主按鈕維持可見",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案為兩名旅客，分別保留兩件和服；女生腰帶獨立關聯，男生無配件；套餐總價不可重複計算。"
+    ],
+    "api": [
+      "POST/PATCH /api/booking-drafts"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "booking-outfits",
+    "group": "預約與付款",
+    "name": "預約 4／7：逐人方案與造型",
+    "route": "/booking 的步驟狀態",
+    "layout": "form",
+    "goal": "完成逐人方案與造型，所有步驟返回不丟資料。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "預約進度",
+        "lines": [
+          "1 門市 → 2 日期 → 3 旅客 → 4 搭配 → 5 加購 → 6 聯絡 → 7 確認"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "旅客搭配配置",
+        "lines": [
+          "旅客分頁：每人一個主要方案",
+          "和服（統一尺寸）／已選配件／選用生成圖",
+          "來源收藏或商品已帶入，不強制重選"
+        ],
+        "actions": [],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "目前配置旅客",
+            "type": "select"
+          },
+          {
+            "label": "主要方案與和服",
+            "type": "select"
+          },
+          {
+            "label": "腰帶（女生選用）",
+            "type": "select",
+            "visibleWhen": "selectedGarmentRole === 'FEMALE'",
+            "allowedCategory": "BELT"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "整筆預約摘要",
+        "lines": [
+          "目前門市、日本日期時段",
+          "人數與各旅客所選搭配",
+          "TWD 方案／配件／攝影／優惠／總計",
+          "此時草稿不保留庫存"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "步驟操作",
+        "lines": [
+          "離開後可恢復未過期草稿；MCP 草稿進入須驗本人擁有權"
+        ],
+        "actions": [
+          {
+            "label": "上一步",
+            "target": "booking-guests",
+            "effect": "保留已填資料"
+          },
+          {
+            "label": "下一步",
+            "target": "booking-addons",
+            "effect": "欄位有效並保存草稿後繼續"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "全員資源不足整筆拒絕，不能部分成立",
+      "變更門市／時段重驗所有方案與人員名額",
+      "未生成／未收藏也可正常完成此步",
+      "手機摘要置主表單後，可收合明細，付款總額與主按鈕維持可見",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案為兩名旅客，分別保留兩件和服；女生腰帶獨立關聯，男生無配件；套餐總價不可重複計算。"
+    ],
+    "api": [
+      "GET /api/plans",
+      "PATCH /api/booking-drafts"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）",
+    "garmentPolicy": {
+      "sizeMode": "UNIFORM",
+      "sizeSelection": false,
+      "accessoriesByGarmentRole": {
+        "FEMALE": [
+          "BELT"
+        ],
+        "MALE": []
+      }
+    }
+  },
+  {
+    "id": "booking-addons",
+    "group": "預約與付款",
+    "name": "預約 5／7：攝影與加值",
+    "route": "/booking 的步驟狀態",
+    "layout": "form",
+    "goal": "完成攝影與加值，所有步驟返回不丟資料。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "預約進度",
+        "lines": [
+          "1 門市 → 2 日期 → 3 旅客 → 4 搭配 → 5 加購 → 6 聯絡 → 7 確認"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "攝影與加購設定",
+        "lines": [
+          "不攝影／棚拍／室外；每筆一種拍攝形式",
+          "室外才選場景／隨行攝影師，再選數位檔／相簿",
+          "已選外拍場景與內含服務沿用，不重選不重複計價",
+          "依適用方案顯示髮型、保險、延遲歸還等加值"
+        ],
+        "actions": [],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "不攝影／棚拍／室外",
+            "type": "select"
+          },
+          {
+            "label": "室外場景：條件符合才出現",
+            "type": "select"
+          },
+          {
+            "label": "數位檔／相簿",
+            "type": "select"
+          },
+          {
+            "label": "加值服務：依方案顯示",
+            "type": "select"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "整筆預約摘要",
+        "lines": [
+          "目前門市、日本日期時段",
+          "人數與各旅客所選搭配",
+          "TWD 方案／配件／攝影／優惠／總計",
+          "此時草稿不保留庫存"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "步驟操作",
+        "lines": [
+          "離開後可恢復未過期草稿；MCP 草稿進入須驗本人擁有權"
+        ],
+        "actions": [
+          {
+            "label": "上一步",
+            "target": "booking-outfits",
+            "effect": "保留已填資料"
+          },
+          {
+            "label": "下一步",
+            "target": "booking-contact",
+            "effect": "欄位有效並保存草稿後繼續"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "全員資源不足整筆拒絕，不能部分成立",
+      "變更門市／時段重驗所有方案與人員名額",
+      "未生成／未收藏也可正常完成此步",
+      "手機摘要置主表單後，可收合明細，付款總額與主按鈕維持可見"
+    ],
+    "api": [
+      "GET /api/photography-options",
+      "PATCH /api/booking-drafts"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "booking-contact",
+    "group": "預約與付款",
+    "name": "預約 6／7：聯絡資料",
+    "route": "/booking 的步驟狀態",
+    "layout": "form",
+    "goal": "完成聯絡資料，所有步驟返回不丟資料。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "預約進度",
+        "lines": [
+          "1 門市 → 2 日期 → 3 旅客 → 4 搭配 → 5 加購 → 6 聯絡 → 7 確認"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "預約會員聯絡資料",
+        "lines": [
+          "姓名／Email／含國碼電話",
+          "通訊方式與備註（長度限制）",
+          "欄位錯誤在欄位下方，不只以顏色表示"
+        ],
+        "actions": [],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "姓名",
+            "type": "text"
+          },
+          {
+            "label": "Email",
+            "type": "email"
+          },
+          {
+            "label": "電話（含國碼）",
+            "type": "tel"
+          },
+          {
+            "label": "通訊方式",
+            "type": "text"
+          },
+          {
+            "label": "備註",
+            "type": "textarea"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "整筆預約摘要",
+        "lines": [
+          "目前門市、日本日期時段",
+          "人數與各旅客所選搭配",
+          "TWD 方案／配件／攝影／優惠／總計",
+          "此時草稿不保留庫存"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "步驟操作",
+        "lines": [
+          "離開後可恢復未過期草稿；MCP 草稿進入須驗本人擁有權"
+        ],
+        "actions": [
+          {
+            "label": "上一步",
+            "target": "booking-addons",
+            "effect": "保留已填資料"
+          },
+          {
+            "label": "下一步",
+            "target": "booking-review",
+            "effect": "欄位有效並保存草稿後繼續"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "全員資源不足整筆拒絕，不能部分成立",
+      "變更門市／時段重驗所有方案與人員名額",
+      "未生成／未收藏也可正常完成此步",
+      "手機摘要置主表單後，可收合明細，付款總額與主按鈕維持可見"
+    ],
+    "api": [
+      "PATCH /api/booking-drafts"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "booking-review",
+    "group": "預約與付款",
+    "name": "預約 7／7：摘要與政策確認",
+    "route": "/booking 的步驟狀態",
+    "layout": "form",
+    "goal": "完成摘要與政策確認，所有步驟返回不丟資料。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "預約進度",
+        "lines": [
+          "1 門市 → 2 日期 → 3 旅客 → 4 搭配 → 5 加購 → 6 聯絡 → 7 確認"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "整筆內容與明細",
+        "lines": [
+          "逐人方案／女生所選腰帶（男生無配件）、攝影、優惠與運費",
+          "目前 TWD 報價與日本時間",
+          "七天取消政策、本人報到及商品保留說明",
+          "勾選取消政策同意，付款前須 Email 驗證"
+        ],
+        "actions": [],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "我已閱讀並同意取消政策",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "整筆預約摘要",
+        "lines": [
+          "目前門市、日本日期時段",
+          "人數與各旅客所選搭配",
+          "TWD 方案／配件／攝影／優惠／總計",
+          "此時草稿不保留庫存"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "步驟操作",
+        "lines": [
+          "離開後可恢復未過期草稿；MCP 草稿進入須驗本人擁有權"
+        ],
+        "actions": [
+          {
+            "label": "上一步",
+            "target": "booking-contact",
+            "effect": "保留已填資料"
+          },
+          {
+            "label": "前往付款",
+            "target": "payment",
+            "effect": "重新計價並成功建立整筆 10 分鐘暫留"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "全員資源不足整筆拒絕，不能部分成立",
+      "變更門市／時段重驗所有方案與人員名額",
+      "未生成／未收藏也可正常完成此步",
+      "手機摘要置主表單後，可收合明細，付款總額與主按鈕維持可見",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案為兩名旅客，分別保留兩件和服；女生腰帶獨立關聯，男生無配件；套餐總價不可重複計算。"
+    ],
+    "api": [
+      "POST /api/pricing/quote",
+      "POST /api/availability/holds"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "payment",
+    "group": "預約與付款",
+    "name": "信用卡付款",
+    "route": "/booking 的付款狀態，獨立 URL 待定",
+    "layout": "form",
+    "goal": "在有效暫留內完成單筆整筆付款。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "資源保留倒數",
+        "lines": [
+          "後端 expiresAt 轉倒數：固定 10 分鐘",
+          "重整不延長；頁面時鐘依 serverTime 校準"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "TapPay 信用卡欄位",
+        "lines": [
+          "卡號／有效月年／安全碼：使用 TapPay Fields",
+          "確認持卡人及交易需要的欄位",
+          "只顯示本筆 TWD 應付金額，不做匯率換算"
+        ],
+        "actions": [
+          {
+            "label": "確認支付整筆金額",
+            "target": "payment-pending",
+            "effect": "先取得 Prime，後端確認結果；防重送"
+          }
+        ],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "TapPay 卡號欄位位置",
+            "type": "text"
+          },
+          {
+            "label": "有效月／年欄位位置",
+            "type": "text"
+          },
+          {
+            "label": "安全碼欄位位置",
+            "type": "password"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "最終交易摘要",
+        "lines": [
+          "全員方案及加購、取消政策",
+          "預約會員一次支付整筆",
+          "網路中斷不代表未扣款"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "付款操作",
+        "lines": [
+          "交易尚未送出可返回修改；送出後須先查核狀態"
+        ],
+        "actions": [
+          {
+            "label": "返回修改",
+            "target": "booking-review",
+            "effect": "確認沒有進行中或待確認付款再解除／重建暫留"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "倒數結束先查交易狀態，不直接釋放待確認付款",
+      "重複點擊不可扣款兩次",
+      "已收款但不能成立時通知全退，不當作成功",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。"
+    ],
+    "api": [
+      "POST /api/bookings",
+      "GET /api/availability/holds/{holdId}",
+      "GET /api/orders/{orderNo}"
+    ],
+    "access": "已驗證 Email 會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "payment-pending",
+    "group": "預約與付款",
+    "name": "付款確認中",
+    "route": "以 orderNo 查詢；不得依賴未成立的 bookingNo",
+    "layout": "form",
+    "goal": "避免把待確認誤顯示成功或引導再次扣款。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "確認付款結果",
+        "lines": [
+          "訂單識別與後端目前狀態",
+          "尚未成立正式預約",
+          "請勿重複付款，離開後可回網站查詢"
+        ],
+        "actions": [
+          {
+            "label": "重新查詢",
+            "target": "",
+            "effect": "查原 orderNo，不再送付款"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "right",
+        "title": "保留與通知",
+        "lines": [
+          "待確認不重新出售庫存",
+          "已扣款但無法成立：顯示退款處理通知",
+          "成功信與 QR 僅在正式預約成立後提供"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "後端確認成功才前往完成頁；確認失敗才提供重新確認入口",
+      "已收款但無法成立須通知全額退款，不顯示成功",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。"
+    ],
+    "api": [
+      "GET /api/orders/{orderNo}"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "payment-failed",
+    "group": "預約與付款",
+    "name": "付款失敗／暫留到期",
+    "route": "付款介面內的恢復狀態",
+    "layout": "form",
+    "goal": "保留選擇並安全重試，不誤導再次扣款。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "交易狀態與原因",
+        "lines": [
+          "已確認未成功／hold 已到期",
+          "若仍待確認則改顯示「確認中」，禁止重試付款"
+        ],
+        "actions": [
+          {
+            "label": "回摘要重新確認",
+            "target": "booking-review",
+            "effect": "重新查價格／庫存／名額，建新暫留"
+          },
+          {
+            "label": "查看訂單狀態",
+            "target": "payment-pending",
+            "effect": "查原交易，不重扣"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "right",
+        "title": "原選擇保留",
+        "lines": [
+          "門市、旅客、和服（統一尺寸）、配件與場景",
+          "若商品已不可用指出需重新選擇項目"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "不能只因瀏覽器返回失敗就判定未扣款",
+      "API 技術錯誤細節不顯示給會員",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。"
+    ],
+    "api": [
+      "GET /api/orders/{orderNo}",
+      "POST /api/pricing/quote"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "booking-complete",
+    "group": "預約與付款",
+    "name": "預約完成",
+    "route": "/booking/complete/:bookingNo",
+    "layout": "detail",
+    "goal": "確認正式成立並提供到店所需資訊。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "正式預約成功",
+        "lines": [
+          "預約編號與成功狀態",
+          "會員頁已同步；成功 Email 寄送狀態"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "門市與行程摘要",
+        "lines": [
+          "門市、地圖開啟、日期場次（日本時間）",
+          "人數／逐人搭配／攝影／已付 TWD 金額",
+          "本人到店及 30 分鐘含期限報到提示"
+        ],
+        "actions": [
+          {
+            "label": "開啟地圖",
+            "target": "",
+            "effect": "開啟真實門市地址"
+          },
+          {
+            "label": "查看我的預約",
+            "target": "booking-detail",
+            "effect": "開正式紀錄"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "right",
+        "title": "會員動態票券",
+        "lines": [
+          "每筆一張 QR 的位置",
+          "每 5 分鐘更新、舊碼失效",
+          "會員本人到指定門市核對，不接受代持"
+        ],
+        "actions": [
+          {
+            "label": "開啟到店票券",
+            "target": "voucher",
+            "effect": "顯示動態 QR 大圖"
+          }
+        ],
+        "kind": "qr"
+      },
+      {
+        "position": "bottom",
+        "title": "後續服務",
+        "lines": [
+          "加入 Google／Apple 行事曆：11/16 才開放",
+          "實拍 7 天數位檔／相簿 30 天的商家交付說明"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "只有後端付款成功且有效保留轉正式後才到此頁",
+      "Email 失敗可後端重試，不回滾預約",
+      "不將 AI 圖保存期限與實拍交付混在一起",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。"
+    ],
+    "api": [
+      "GET /api/bookings/{bookingNo}",
+      "GET .../voucher"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "bookings",
+    "group": "會員中心",
+    "name": "我的預約列表",
+    "route": "會員頁內預約分頁；獨立 /bookings 為新增頁路徑建議",
+    "layout": "catalog",
+    "goal": "找本人預約、票券及退款處理狀態。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "預約篩選",
+        "lines": [
+          "即將到店／已完成／已取消／退款狀態",
+          "日期範圍與狀態標籤"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "預約列表",
+        "lines": [
+          "預約編號、門市、日本時間、人數",
+          "逐筆已付 TWD 金額、狀態、退款摘要"
+        ],
+        "actions": [
+          {
+            "label": "查看詳情",
+            "target": "booking-detail",
+            "effect": "讀取本人紀錄"
+          },
+          {
+            "label": "出示票券",
+            "target": "voucher",
+            "effect": "有效預約才可開啟"
+          }
+        ],
+        "kind": "cards"
+      },
+      {
+        "position": "bottom",
+        "title": "空列表入口",
+        "lines": [
+          "沒有預約時提供探索方案，不顯示假訂單"
+        ],
+        "actions": [
+          {
+            "label": "探索方案",
+            "target": "plans",
+            "effect": "開始選方案"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "取消後仍保留紀錄",
+      "跨裝置從後端讀最新狀態"
+    ],
+    "api": [
+      "GET /api/bookings"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "booking-detail",
+    "group": "會員中心",
+    "name": "我的預約詳情",
+    "route": "/bookings/:bookingNo",
+    "layout": "detail",
+    "goal": "集中查看預約、到店、取消與退款。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "預約狀態",
+        "lines": [
+          "預約編號、已付款／已取消／已核銷／退款狀態",
+          "商家取消或天候取消的原因"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "旅客與門市明細",
+        "lines": [
+          "日本時間、地址與地圖",
+          "1～3 位旅客搭配、實體保留款式（統一尺寸）／配件",
+          "攝影場景、已付款明細與取消政策"
+        ],
+        "actions": [
+          {
+            "label": "查看取消／退款",
+            "target": "cancel-booking",
+            "effect": "先顯示估算與政策，不立即取消"
+          },
+          {
+            "label": "重新預約",
+            "target": "booking-store",
+            "effect": "改期須另建新單，原單依取消政策"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "right",
+        "title": "票券與提醒",
+        "lines": [
+          "有效預約顯示動態票券入口",
+          "本人到指定店、開始後 30 分鐘含期限報到",
+          "天候攝影部分退款不使租借票券失效"
+        ],
+        "actions": [
+          {
+            "label": "出示到店票券",
+            "target": "voucher",
+            "effect": "每筆一次核銷"
+          }
+        ],
+        "kind": "qr"
+      },
+      {
+        "position": "bottom",
+        "title": "退款進度",
+        "lines": [
+          "處理中／完成／失敗與客服資訊",
+          "成功 Email 與體驗前提醒分開；後者 11/16"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "已付款金額固定，不改成目前商品價",
+      "已取消／已核銷或逾期未報到不提供可用 QR",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案為兩名旅客，分別保留兩件和服；女生腰帶獨立關聯，男生無配件；套餐總價不可重複計算。"
+    ],
+    "api": [
+      "GET /api/bookings/{bookingNo}",
+      "GET .../voucher"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "cancel-booking",
+    "group": "會員中心",
+    "name": "取消預約確認",
+    "route": "預約詳情內確認畫面，URL 待定",
+    "layout": "form",
+    "goal": "在破壞性動作前看清退款並確認。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "取消與退款試算",
+        "lines": [
+          "日本場次開始時間",
+          "距開始超過 7×24 小時全退；等於或更短不退",
+          "預估可退 TWD 金額與目前計算時間",
+          "取消原因"
+        ],
+        "actions": [
+          {
+            "label": "確認取消預約",
+            "target": "booking-detail",
+            "effect": "提交時重算；金額有變動須再確認"
+          },
+          {
+            "label": "保留預約，返回",
+            "target": "booking-detail",
+            "effect": "不取消、不退款"
+          }
+        ],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "取消原因",
+            "type": "textarea"
+          },
+          {
+            "label": "我確認取消及本次退款金額",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "取消後影響",
+        "lines": [
+          "票券失效，資源依安全規則釋放",
+          "退款由授權後台人員執行",
+          "提出取消不代表金額已入帳"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "退款處理中／失敗需顯示後續處理",
+      "商家取消與天候攝影退費不套顧客七天政策"
+    ],
+    "api": [
+      "GET .../cancellation-quote",
+      "POST /api/bookings/{bookingNo}/cancel"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "voucher",
+    "group": "會員中心",
+    "name": "到店動態票券",
+    "route": "預約詳情的全頁／大圖模式，URL 待定",
+    "layout": "ticket",
+    "goal": "快速讓店員核對本人與整筆預約。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "動態 QR 區",
+        "lines": [
+          "QR 位置，不放個資",
+          "5 分鐘更新與目前有效倒數",
+          "畫面保持登入，不以靜態截圖代替"
+        ],
+        "actions": [
+          {
+            "label": "更新票券狀態",
+            "target": "",
+            "effect": "查後端票券，不延長報到期限"
+          }
+        ],
+        "kind": "qr"
+      },
+      {
+        "position": "right",
+        "title": "到店核對資訊",
+        "lines": [
+          "預約編號／門市／日本日期時段",
+          "預約會員本人須到場、旅客人數",
+          "報到截止：開始後 30 分鐘（含）",
+          "已報到／已核銷／取消／未到場狀態"
+        ],
+        "actions": [
+          {
+            "label": "返回預約",
+            "target": "booking-detail",
+            "effect": "回預約明細"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "一筆預約一張票券，不因多人拆票",
+      "票券過期／取消／已核銷不顯示可用 QR",
+      "動態碼不是本人身分證明，店員仍核對本人",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。"
+    ],
+    "api": [
+      "GET /api/bookings/{bookingNo}/voucher"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "account",
+    "group": "會員中心",
+    "name": "會員帳號總覽",
+    "route": "/account",
+    "layout": "catalog",
+    "goal": "會員資料與收藏、預約、生成圖及 MCP 集中入口。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "會員與驗證狀態",
+        "lines": [
+          "Email（遮罩）、已驗證／待驗證",
+          "網站剩餘 5 次／MCP 剩餘 3 次，顯示日本日界線"
+        ],
+        "actions": [
+          {
+            "label": "完成 Email 驗證",
+            "target": "verify",
+            "effect": "僅未驗證時顯示"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "會員功能入口",
+        "lines": [
+          "收藏搭配、我的預約與票券、網站生成圖"
+        ],
+        "actions": [
+          {
+            "label": "我的收藏",
+            "target": "looks",
+            "effect": "讀本人收藏"
+          },
+          {
+            "label": "我的預約",
+            "target": "bookings",
+            "effect": "讀本人預約"
+          },
+          {
+            "label": "我的生成圖",
+            "target": "generations",
+            "effect": "圖庫及原圖管理"
+          }
+        ],
+        "kind": "cards"
+      },
+      {
+        "position": "right",
+        "title": "帳號與外部 agent",
+        "lines": [
+          "MCP 為選用，不是使用網站前提"
+        ],
+        "actions": [
+          {
+            "label": "連接自己的 AI 小幫手",
+            "target": "mcp",
+            "effect": "開 MCP 連線與 token 管理"
+          },
+          {
+            "label": "重設密碼",
+            "target": "reset",
+            "effect": "由 Firebase 寄信"
+          },
+          {
+            "label": "登出",
+            "target": "home",
+            "effect": "清登入狀態，回公開頁"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "資料與隱私",
+        "lines": [
+          "原圖／生成圖／收藏管理分開",
+          "永久刪帳的條件與影響"
+        ],
+        "actions": [
+          {
+            "label": "刪除帳號",
+            "target": "delete-account",
+            "effect": "先做未結事項檢查"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "不在總覽顯示完整 MCP token",
+      "登入後依原觸發入口返回，不一律進會員首頁"
+    ],
+    "api": [
+      "GET /api/account",
+      "GET /api/account/generation-usage"
+    ],
+    "access": "會員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "mcp",
+    "group": "會員中心",
+    "name": "MCP 連線與 token",
+    "route": "/account/mcp",
+    "layout": "form",
+    "goal": "讓會員自己的 agent 安全連接本站。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "MCP 狀態",
+        "lines": [
+          "尚未建立／有效／已撤銷／已到期",
+          "90 天到期時間與 Email 驗證狀態"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "首次設定步驟",
+        "lines": [
+          "1 驗 Email、建立本人 token",
+          "2 下載套件／複製 mcp.json 範本",
+          "3 在自己的 agent 載入設定並檢查連線"
+        ],
+        "actions": [
+          {
+            "label": "建立 token",
+            "target": "",
+            "effect": "需 Email 驗證，只顯示一次"
+          },
+          {
+            "label": "複製新 token",
+            "target": "",
+            "effect": "只在剛建立成功時可用"
+          },
+          {
+            "label": "下載設定套件",
+            "target": "",
+            "effect": "下載不包含舊完整 token 的套件"
+          },
+          {
+            "label": "複製設定範本",
+            "target": "",
+            "effect": "會員自行貼入 token"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "right",
+        "title": "有效 token 管理",
+        "lines": [
+          "每人同時一個有效、只存雜湊",
+          "舊完整值不可再次取得，遺失須重建"
+        ],
+        "actions": [
+          {
+            "label": "撤銷 token",
+            "target": "",
+            "effect": "另確認後立即失效"
+          },
+          {
+            "label": "重建 token",
+            "target": "",
+            "effect": "另確認，舊值立即失效"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "限制與隱私",
+        "lines": [
+          "每日 3 次、同時 1 個，與網站分開",
+          "MCP 圖當天日本午夜刪、不進收藏",
+          "可查商品、名額、上傳、試穿及草稿；付款等回網站",
+          "外部 agent 副本不隨本站刪除"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "有效 token 不等於照片處理同意或每次生成確認",
+      "不要在草稿連結帶 token",
+      "網址 TTL／到期重發政策仍待定案，不寫死",
+      "本專案不提供內建 agent 或聊天模型",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案的女生／男生照片、和服與結果分開關聯；替換或刪除其中一人不影響另一人。"
+    ],
+    "api": [
+      "GET /api/account/mcp-config",
+      "GET/POST/DELETE /api/account/mcp-token",
+      "POST .../rotate"
+    ],
+    "access": "會員；建 token 另驗 Email",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "delete-account",
+    "group": "會員中心",
+    "name": "永久刪除帳號",
+    "route": "會員帳號內確認畫面，URL 待定",
+    "layout": "form",
+    "goal": "先處理未結事項，再確認永久刪除範圍。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "刪除前檢查",
+        "lines": [
+          "暫留、待確認付款、未體驗預約、未歸還、退款未結事項",
+          "有阻擋時逐項提供前往處理入口"
+        ],
+        "actions": [
+          {
+            "label": "查看需處理預約",
+            "target": "bookings",
+            "effect": "先取消／完成退款或歸還"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "right",
+        "title": "永久刪除範圍",
+        "lines": [
+          "本人照、生成圖、收藏、本站預約與交易資料",
+          "Firebase 帳號與 MCP token 立即停權／撤銷",
+          "備份最遲 10 天輪替；還原重套刪除",
+          "TapPay 及外部 agent 副本不同步移除"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "最後確認",
+        "lines": [
+          "重新驗證身分，明確確認永久刪除",
+          "有未結事項時停用確認按鈕"
+        ],
+        "actions": [
+          {
+            "label": "永久刪除我的帳號",
+            "target": "home",
+            "effect": "後端再次檢查，成功立即停止存取"
+          },
+          {
+            "label": "返回會員頁",
+            "target": "account",
+            "effect": "不刪除"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "已完成歷史交易不持續阻擋",
+      "不連帶刪商店庫存或別人的資料",
+      "不要把 10 天備份期限誤當 token 仍可用期限"
+    ],
+    "api": [
+      "POST /api/account/deletion-check",
+      "DELETE /api/account"
+    ],
+    "access": "會員＋重新驗證",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "admin-login",
+    "group": "門市後台",
+    "name": "後台登入",
+    "route": "後台登入入口，前端 URL 待定",
+    "layout": "form",
+    "goal": "驗 Firebase 身分後再確認後台角色。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "後台登入",
+        "lines": [
+          "Email／密碼",
+          "一般會員登入不代表可進後台"
+        ],
+        "actions": [
+          {
+            "label": "登入後台",
+            "target": "admin-bookings",
+            "effect": "後端驗角色及門市授權"
+          }
+        ],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "Email",
+            "type": "email"
+          },
+          {
+            "label": "密碼",
+            "type": "password"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "角色說明",
+        "lines": [
+          "門市人員：所屬門市",
+          "總管理員：全站商品、價格與調撥",
+          "退款須另有授權"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "登入失敗／無角色／停權顯示清楚提示",
+      "每支管理 API 都須再次驗權限"
+    ],
+    "api": [
+      "Firebase Authentication SDK",
+      "GET /api/account"
+    ],
+    "access": "門市／總管理員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "admin-bookings",
+    "group": "門市後台",
+    "name": "預約管理列表",
+    "route": "後台頁，前端 URL 待定",
+    "layout": "admin",
+    "goal": "快速找到今天與指定日期的預約。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "查詢列",
+        "lines": [
+          "所屬門市、日期範圍、預約／付款狀態、關鍵字",
+          "門市人員不能切到未授權門市"
+        ],
+        "actions": [
+          {
+            "label": "查詢",
+            "target": "",
+            "effect": "套用條件"
+          }
+        ],
+        "kind": "fields"
+      },
+      {
+        "position": "main",
+        "title": "預約工作表",
+        "lines": [
+          "預約編號／日本時間／人數／會員識別",
+          "付款狀態／報到／核銷／退款",
+          "行動版改為預約卡片"
+        ],
+        "actions": [
+          {
+            "label": "查看詳情",
+            "target": "admin-detail",
+            "effect": "讀授權門市資料"
+          },
+          {
+            "label": "報到核銷",
+            "target": "admin-checkin",
+            "effect": "先本人核對"
+          }
+        ],
+        "kind": "table"
+      },
+      {
+        "position": "right",
+        "title": "管理導覽",
+        "lines": [
+          "預約／報到／庫存／出借／名額",
+          "總管可見商品價格與調撥，退款依權限顯示"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "沒有資料與查詢失敗分開提示",
+      "不提供任意改為已付款／已核銷的狀態下拉選單"
+    ],
+    "api": [
+      "GET /api/admin/bookings"
+    ],
+    "access": "門市／總管理員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "admin-detail",
+    "group": "門市後台",
+    "name": "預約詳情與處理",
+    "route": "後台預約詳情，前端 URL 待定",
+    "layout": "admin",
+    "goal": "查看全員搭配、付款、保留與合法操作。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "預約狀態與角色",
+        "lines": [
+          "預約編號、所屬門市、日期／日本時間",
+          "付款／報到／核銷／履約狀態"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "旅客、搭配與保留",
+        "lines": [
+          "各旅客方案／和服（統一尺寸）／配件",
+          "授權供預約使用的試穿圖位置",
+          "系統分配的實體庫存、租借／整備期間"
+        ],
+        "actions": [
+          {
+            "label": "登記報到",
+            "target": "admin-checkin",
+            "effect": "核本人與期限"
+          },
+          {
+            "label": "登記交付",
+            "target": "admin-rentals",
+            "effect": "核銷後記實際庫存編號"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "right",
+        "title": "交易與客服處理",
+        "lines": [
+          "已付 TWD 金額、攝影拆分、退款進度",
+          "操作紀錄／原因／操作者"
+        ],
+        "actions": [
+          {
+            "label": "天候取消攝影",
+            "target": "admin-refund",
+            "effect": "租借有效，退全部攝影費"
+          },
+          {
+            "label": "商家取消預約",
+            "target": "admin-refund",
+            "effect": "無法履約全退，另確認"
+          },
+          {
+            "label": "處理退款",
+            "target": "admin-refund",
+            "effect": "僅退款授權可見"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "不透過一般狀態更新繞過付款或錯釋庫存",
+      "本人未到不允許其他旅客代核銷",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "情侶方案為兩名旅客，分別保留兩件和服；女生腰帶獨立關聯，男生無配件；套餐總價不可重複計算。"
+    ],
+    "api": [
+      "GET /api/admin/bookings/{bookingId}"
+    ],
+    "access": "門市／總管理員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "admin-checkin",
+    "group": "門市後台",
+    "name": "本人報到與 QR 核銷",
+    "route": "後台核銷工作區，前端 URL 待定",
+    "layout": "admin",
+    "goal": "先記錄期限內報到，再線上一次核銷整筆。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "本人與到場核對",
+        "lines": [
+          "預約會員本人核對確認",
+          "各旅客到場／未到紀錄，不拆票",
+          "日本開始時間、30 分鐘含期限、後端報到時間"
+        ],
+        "actions": [
+          {
+            "label": "記錄本人報到",
+            "target": "",
+            "effect": "店員當下記錄，不任意倒填時間"
+          }
+        ],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "已核對預約會員本人身分",
+            "type": "checkbox"
+          },
+          {
+            "label": "各旅客到場紀錄",
+            "type": "select"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "掃碼／驗證結果",
+        "lines": [
+          "相機掃碼區位置",
+          "掃碼後顯示所屬門市、預約及票券狀態",
+          "核銷成功／已用／取消／逾期／跨店等回饋"
+        ],
+        "actions": [
+          {
+            "label": "啟動掃碼",
+            "target": "",
+            "effect": "經裝置相機授權後掃碼"
+          },
+          {
+            "label": "確認核銷整筆",
+            "target": "admin-rentals",
+            "effect": "已核本人、有效報到與有效 QR 才送出"
+          }
+        ],
+        "kind": "qr"
+      }
+    ],
+    "rules": [
+      "相機不可用可輸入掃描器取得的完整 QR payload，不靠可猜預約編號繞過動態碼",
+      "期限內已報到者排隊後仍可核銷",
+      "併發只成功一次，核銷不立即讓商品可租"
+    ],
+    "api": [
+      "POST .../check-in",
+      "POST /api/admin/vouchers/redeem"
+    ],
+    "access": "所屬門市人員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "admin-inventory",
+    "group": "門市後台",
+    "name": "實體庫存列表",
+    "route": "後台庫存管理，前端 URL 待定",
+    "layout": "admin",
+    "goal": "查款式（統一尺寸）、配件庫存及可用期間。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "庫存篩選",
+        "lines": [
+          "門市／和服或女生腰帶／狀態／期間（無尺寸篩選）"
+        ],
+        "actions": [
+          {
+            "label": "查詢",
+            "target": "",
+            "effect": "僅查授權門市"
+          },
+          {
+            "label": "新增庫存",
+            "target": "admin-inventory-detail",
+            "effect": "僅總管可新增"
+          }
+        ],
+        "kind": "fields"
+      },
+      {
+        "position": "main",
+        "title": "庫存表",
+        "lines": [
+          "內部編號／商品／門市（統一尺寸，不按尺寸分庫存）",
+          "可用／暫留／保留／出借／清潔／維修／停用",
+          "重疊期間不可分配"
+        ],
+        "actions": [
+          {
+            "label": "查看庫存詳情",
+            "target": "admin-inventory-detail",
+            "effect": "看保留與履歷"
+          }
+        ],
+        "kind": "table"
+      },
+      {
+        "position": "right",
+        "title": "狀態說明",
+        "lines": [
+          "會員選款式（統一尺寸），不指定內部編號",
+          "門市不改全站售價或其他店庫存"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "已保留商品人工調整不得損害履約",
+      "未選示意配件沒有庫存保留",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。"
+    ],
+    "api": [
+      "GET /api/admin/inventory"
+    ],
+    "access": "門市／總管理員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "admin-inventory-detail",
+    "group": "門市後台",
+    "name": "庫存詳情、整備與調撥",
+    "route": "後台庫存詳情，前端 URL 待定",
+    "layout": "admin",
+    "goal": "管理單件履歷與合法狀態轉移。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "商品與期間",
+        "lines": [
+          "內部編號、款式（統一尺寸）、門市、目前狀態",
+          "租借與整備期間／預約保留關聯",
+          "狀態變更原因與版本"
+        ],
+        "actions": [
+          {
+            "label": "完成清潔整備",
+            "target": "",
+            "effect": "經檢查完成後才恢復可用"
+          },
+          {
+            "label": "送修／停用",
+            "target": "",
+            "effect": "驗證不衝突既有保留並記原因"
+          }
+        ],
+        "kind": "fields"
+      },
+      {
+        "position": "right",
+        "title": "總管調撥與稽核",
+        "lines": [
+          "來源／目的門市、期間與原因",
+          "保留衝突檢查、操作者與時間"
+        ],
+        "actions": [
+          {
+            "label": "建立調撥",
+            "target": "",
+            "effect": "總管權限，不能破壞已付預約"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "只有明確允許的狀態可操作",
+      "無法履約須通知，替代款與價差先取得會員同意",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。"
+    ],
+    "api": [
+      "GET/PATCH /api/admin/inventory/{inventoryId}",
+      "POST /api/admin/inventory-transfers"
+    ],
+    "access": "門市；調撥限總管",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "admin-rentals",
+    "group": "門市後台",
+    "name": "出借與歸還",
+    "route": "後台履約工作區，前端 URL 待定",
+    "layout": "admin",
+    "goal": "記錄實際交付與歸還，不把核銷當作可再出租。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "出借／歸還項目",
+        "lines": [
+          "預約與已核銷狀態",
+          "各旅客交付的庫存編號",
+          "歸還清單、損壞與延遲備註"
+        ],
+        "actions": [
+          {
+            "label": "確認交付出借",
+            "target": "",
+            "effect": "核銷後登記實際交付"
+          },
+          {
+            "label": "登記歸還",
+            "target": "",
+            "effect": "轉檢查清潔，不直接可用"
+          }
+        ],
+        "kind": "fields"
+      },
+      {
+        "position": "right",
+        "title": "後續整備",
+        "lines": [
+          "歸還後進檢查／清潔／維修",
+          "延遲或損壞影響下筆時通知處理"
+        ],
+        "actions": [
+          {
+            "label": "查看庫存整備",
+            "target": "admin-inventory-detail",
+            "effect": "依實際庫存續處理"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "不提供尚未規劃的押金或自動罰款功能",
+      "操作留時間與人員紀錄"
+    ],
+    "api": [
+      "POST .../bookings/{bookingId}/rentals",
+      "POST /api/admin/rentals/{rentalId}/return"
+    ],
+    "access": "所屬門市人員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "admin-slots",
+    "group": "門市後台",
+    "name": "接待與攝影名額",
+    "route": "後台場次管理，前端 URL 待定",
+    "layout": "admin",
+    "goal": "維護可接待人數、攝影容量與開放日。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "門市與服務條件",
+        "lines": [
+          "門市／日期／接待或攝影／場景"
+        ],
+        "actions": [
+          {
+            "label": "查詢",
+            "target": "",
+            "effect": "讀授權門市場次"
+          },
+          {
+            "label": "新增場次",
+            "target": "",
+            "effect": "新增前驗日期與服務條件"
+          }
+        ],
+        "kind": "fields"
+      },
+      {
+        "position": "main",
+        "title": "場次列表與編輯",
+        "lines": [
+          "日本時間；攝影預設 09:00／13:00 可調整",
+          "總容量、暫留、已保留、剩餘",
+          "櫻花季與當年景點人力開放條件"
+        ],
+        "actions": [
+          {
+            "label": "編輯場次",
+            "target": "",
+            "effect": "容量不能低於已承諾需求"
+          },
+          {
+            "label": "儲存場次",
+            "target": "",
+            "effect": "後端重驗並留紀錄"
+          }
+        ],
+        "kind": "fields"
+      },
+      {
+        "position": "right",
+        "title": "保留約束",
+        "lines": [
+          "全員和服、配件及接待／攝影皆可提供才允許付款",
+          "調整不影響有效既有預約"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "不把「最近可預約日期」期末推薦功能混入期中管理頁",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。"
+    ],
+    "api": [
+      "GET/POST /api/admin/slots",
+      "PATCH /api/admin/slots/{slotId}"
+    ],
+    "access": "所屬門市／總管",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "admin-catalog",
+    "group": "門市後台",
+    "name": "商品、方案與價格",
+    "route": "後台商品管理，前端 URL 待定",
+    "layout": "admin",
+    "goal": "總管維護全站商品與方案。",
+    "blocks": [
+      {
+        "position": "hero",
+        "title": "資源分類",
+        "lines": [
+          "和服／配件／和服方案／外拍方案／門市",
+          "關鍵字、上架／停用狀態"
+        ],
+        "actions": [
+          {
+            "label": "新增項目",
+            "target": "admin-editor",
+            "effect": "依目前分類建立"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "資料列表",
+        "lines": [
+          "商品 ID、名稱、統一尺寸說明、TWD 現價、適用門市",
+          "方案內含及加值項目、上架狀態"
+        ],
+        "actions": [
+          {
+            "label": "編輯",
+            "target": "admin-editor",
+            "effect": "讀授權完整資料"
+          }
+        ],
+        "kind": "table"
+      },
+      {
+        "position": "right",
+        "title": "來源素材區",
+        "lines": [
+          "商品圖、預製穿搭圖與模特兒來源分開",
+          "預製圖中的可售／僅示意配件 ID 關聯"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "不用假資料偽裝正式商品",
+      "圖片／模特兒素材上傳與維護 API 尚需在實作時補齊契約",
+      "售價變更不改已付訂單",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。",
+      "可選實體配件目錄僅女生腰帶；舊髮飾／包包等不可沿用為新購選項。"
+    ],
+    "api": [
+      "GET /api/admin/plans",
+      "GET /api/admin/kimonos",
+      "GET /api/admin/accessories",
+      "GET /api/admin/photography-options",
+      "GET /api/admin/stores"
+    ],
+    "access": "總管理員",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）",
+    "garmentPolicy": {
+      "sizeMode": "UNIFORM",
+      "sizeSelection": false,
+      "accessoriesByGarmentRole": {
+        "FEMALE": [
+          "BELT"
+        ],
+        "MALE": []
+      }
+    }
+  },
+  {
+    "id": "admin-editor",
+    "group": "門市後台",
+    "name": "商品／方案編輯",
+    "route": "商品管理的編輯畫面，URL 待定",
+    "layout": "admin",
+    "goal": "依資源類型編輯，保留價格及圖片關聯。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "依資源顯示表單",
+        "lines": [
+          "商品：款式、統一尺寸說明、圖片、適用方案／門市",
+          "方案：包含服務、加購與 TWD 金額",
+          "外拍：場景、季節、輸出、攝影費拆分",
+          "門市：地址、時區、交通、營業與語言"
+        ],
+        "actions": [
+          {
+            "label": "儲存變更",
+            "target": "admin-catalog",
+            "effect": "後端驗欄位、版本與權限"
+          },
+          {
+            "label": "返回列表",
+            "target": "admin-catalog",
+            "effect": "未存變更先提示"
+          }
+        ],
+        "kind": "fields"
+      },
+      {
+        "position": "right",
+        "title": "上架與對應",
+        "lines": [
+          "商品／預製圖及配件對應",
+          "上架前必要資料完整性",
+          "有保留的商品停用不得造成無法履約"
+        ],
+        "actions": [],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "同一畫面可共用表單殼，但不同資源欄位不混成一張超長表",
+      "敏感調整需原因與稽核",
+      "素材上傳契約標為待補，不假定已存在",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。"
+    ],
+    "api": [
+      "POST/PATCH /api/admin/plans、kimonos、accessories、photography-options、stores"
+    ],
+    "access": "總管；部分攝影依授權",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）",
+    "garmentPolicy": {
+      "sizeMode": "UNIFORM",
+      "sizeSelection": false,
+      "accessoriesByGarmentRole": {
+        "FEMALE": [
+          "BELT"
+        ],
+        "MALE": []
+      }
+    }
+  },
+  {
+    "id": "admin-refund",
+    "group": "門市後台",
+    "name": "取消與退款處理",
+    "route": "後台預約中的授權操作面板，URL 待定",
+    "layout": "admin",
+    "goal": "明確區分顧客取消、商家取消與天候攝影退費。",
+    "blocks": [
+      {
+        "position": "main",
+        "title": "退款原因與計算",
+        "lines": [
+          "顧客取消：七天政策",
+          "商家無法履約：全額退款",
+          "天候室外不可行：退全部內含及加購攝影費，不扣相簿備貨",
+          "原付款、已退、此次應退 TWD 金額與原因"
+        ],
+        "actions": [
+          {
+            "label": "確認授權退款",
+            "target": "",
+            "effect": "後端計算可退額，冪等送 TapPay"
+          },
+          {
+            "label": "重新查退款狀態",
+            "target": "",
+            "effect": "不重複發退款"
+          }
+        ],
+        "kind": "content",
+        "controls": [
+          {
+            "label": "退款原因類型",
+            "type": "select"
+          },
+          {
+            "label": "原因及通知紀錄",
+            "type": "textarea"
+          },
+          {
+            "label": "確認授權退款及應退金額",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "position": "right",
+        "title": "影響與確認",
+        "lines": [
+          "天候不改拍：和服租借與 QR 仍有效",
+          "商家取消：預約及 QR 失效，資源安全釋放",
+          "處理中／完成／失敗、操作者、通知紀錄"
+        ],
+        "actions": [
+          {
+            "label": "返回預約",
+            "target": "admin-detail",
+            "effect": "保留已處理結果"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "無退款授權者不顯示執行按鈕，API 也必須拒絕",
+      "天候判定在體驗前並通知會員",
+      "商家替代款與價差先獲同意，不自動替換",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。"
+    ],
+    "api": [
+      "POST .../cancel",
+      "POST .../weather-cancellation",
+      "POST .../refunds",
+      "GET /api/admin/refunds/{refundId}"
+    ],
+    "access": "退款另授權",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "guide",
+    "group": "說明與政策",
+    "name": "使用流程",
+    "route": "/guide",
+    "layout": "article",
+    "goal": "提供使用流程資訊與相關下一步。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "章節導覽",
+        "lines": [
+          "可點選章節／分類錨點",
+          "手機改上方橫向換行分類"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "使用流程",
+        "lines": [
+          "選方案→選用試穿／收藏→預約付款→到店",
+          "本人核對、動態 QR、報到期限與歸還",
+          "網站與外部 AI agent 兩種入口"
+        ],
+        "actions": [
+          {
+            "label": "立即選方案",
+            "target": "plans",
+            "effect": "需要會員操作時先登入"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "相關連結",
+        "lines": [
+          "使用流程／FAQ／隱私／取消退款／條款"
+        ],
+        "actions": [
+          {
+            "label": "聯絡商家",
+            "target": "contact",
+            "effect": "顯示正式聯絡資訊"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "正式內容與商家聯絡資料待補；線框只定義版位",
+      "FAQ 搜尋、三語系及行事曆等 11/16 項目不先冒充可用",
+      "政策頁閱讀不觸發同意或登入"
+    ],
+    "api": [],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "faq",
+    "group": "說明與政策",
+    "name": "常見問題",
+    "route": "/faq",
+    "layout": "article",
+    "goal": "提供常見問題資訊與相關下一步。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "章節導覽",
+        "lines": [
+          "可點選章節／分類錨點",
+          "手機改上方橫向換行分類"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "常見問題",
+        "lines": [
+          "預約／付款／統一尺寸說明／兒童／髮型／攝影／取消／遲到／AI 隱私分類",
+          "問題折疊展開與分類錨點",
+          "11/16 再提供 FAQ 關鍵字搜尋"
+        ],
+        "actions": [
+          {
+            "label": "查看取消規則",
+            "target": "cancellation",
+            "effect": "需要會員操作時先登入"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "相關連結",
+        "lines": [
+          "使用流程／FAQ／隱私／取消退款／條款"
+        ],
+        "actions": [
+          {
+            "label": "聯絡商家",
+            "target": "contact",
+            "effect": "顯示正式聯絡資訊"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "正式內容與商家聯絡資料待補；線框只定義版位",
+      "FAQ 搜尋、三語系及行事曆等 11/16 項目不先冒充可用",
+      "政策頁閱讀不觸發同意或登入",
+      "2026-10-19 最新規則：所有和服統一尺寸，不提供尺寸選擇／篩選或尺寸別庫存。",
+      "2026-10-19 最新規則：女生可選配件僅腰帶；男生無任何配件。前後端、價格、收藏與庫存均套用。"
+    ],
+    "api": [],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow／2026-10-19 最新使用邏輯（delivery-plan-2026-10-23/01-current-business-rules.md）"
+  },
+  {
+    "id": "about",
+    "group": "說明與政策",
+    "name": "關於 KINU TABI",
+    "route": "/about",
+    "layout": "article",
+    "goal": "提供關於 KINU TABI資訊與相關下一步。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "章節導覽",
+        "lines": [
+          "可點選章節／分類錨點",
+          "手機改上方橫向換行分類"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "關於 KINU TABI",
+        "lines": [
+          "服務定位、東京／京都範圍",
+          "AI 預覽限制與商品保留方式",
+          "品牌介紹與合法授權圖像位置"
+        ],
+        "actions": [
+          {
+            "label": "探索方案",
+            "target": "plans",
+            "effect": "需要會員操作時先登入"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "相關連結",
+        "lines": [
+          "使用流程／FAQ／隱私／取消退款／條款"
+        ],
+        "actions": [
+          {
+            "label": "聯絡商家",
+            "target": "contact",
+            "effect": "顯示正式聯絡資訊"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "正式內容與商家聯絡資料待補；線框只定義版位",
+      "FAQ 搜尋、三語系及行事曆等 11/16 項目不先冒充可用",
+      "政策頁閱讀不觸發同意或登入"
+    ],
+    "api": [],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "contact",
+    "group": "說明與政策",
+    "name": "聯絡我們",
+    "route": "/contact",
+    "layout": "article",
+    "goal": "提供聯絡我們資訊與相關下一步。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "章節導覽",
+        "lines": [
+          "可點選章節／分類錨點",
+          "手機改上方橫向換行分類"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "聯絡我們",
+        "lines": [
+          "商家正式聯絡方式位置（實際資訊待提供）",
+          "營業／客服時間與門市資訊",
+          "勿透過公開聯絡入口傳照片、卡號或 token"
+        ],
+        "actions": [
+          {
+            "label": "查門市資訊",
+            "target": "stores",
+            "effect": "需要會員操作時先登入"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "相關連結",
+        "lines": [
+          "使用流程／FAQ／隱私／取消退款／條款"
+        ],
+        "actions": [
+          {
+            "label": "聯絡商家",
+            "target": "contact",
+            "effect": "顯示正式聯絡資訊"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "正式內容與商家聯絡資料待補；線框只定義版位",
+      "FAQ 搜尋、三語系及行事曆等 11/16 項目不先冒充可用",
+      "政策頁閱讀不觸發同意或登入"
+    ],
+    "api": [],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "privacy",
+    "group": "說明與政策",
+    "name": "隱私權政策",
+    "route": "/privacy",
+    "layout": "article",
+    "goal": "提供隱私權政策資訊與相關下一步。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "章節導覽",
+        "lines": [
+          "可點選章節／分類錨點",
+          "手機改上方橫向換行分類"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "隱私權政策",
+        "lines": [
+          "資料類型、處理目的、供應商與地區",
+          "本人原圖、網站 7 天圖、MCP 午夜圖、刪帳備份 10 天",
+          "本人同意／生成確認／token 授權分開",
+          "外部 agent／支付服務副本範圍"
+        ],
+        "actions": [
+          {
+            "label": "管理我的資料",
+            "target": "account",
+            "effect": "需要會員操作時先登入"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "相關連結",
+        "lines": [
+          "使用流程／FAQ／隱私／取消退款／條款"
+        ],
+        "actions": [
+          {
+            "label": "聯絡商家",
+            "target": "contact",
+            "effect": "顯示正式聯絡資訊"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "正式內容與商家聯絡資料待補；線框只定義版位",
+      "FAQ 搜尋、三語系及行事曆等 11/16 項目不先冒充可用",
+      "政策頁閱讀不觸發同意或登入"
+    ],
+    "api": [],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "cancellation",
+    "group": "說明與政策",
+    "name": "取消與退款",
+    "route": "/cancellation",
+    "layout": "article",
+    "goal": "提供取消與退款資訊與相關下一步。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "章節導覽",
+        "lines": [
+          "可點選章節／分類錨點",
+          "手機改上方橫向換行分類"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "取消與退款",
+        "lines": [
+          "按日本場次時間，超過 7×24 小時全退；等於或更短不退",
+          "改期取消原單再建新單",
+          "商家取消全退，天候攝影退費不影響租借",
+          "退款處理中／完成／失敗的查看方式"
+        ],
+        "actions": [
+          {
+            "label": "查看我的預約",
+            "target": "bookings",
+            "effect": "需要會員操作時先登入"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "相關連結",
+        "lines": [
+          "使用流程／FAQ／隱私／取消退款／條款"
+        ],
+        "actions": [
+          {
+            "label": "聯絡商家",
+            "target": "contact",
+            "effect": "顯示正式聯絡資訊"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "正式內容與商家聯絡資料待補；線框只定義版位",
+      "FAQ 搜尋、三語系及行事曆等 11/16 項目不先冒充可用",
+      "政策頁閱讀不觸發同意或登入"
+    ],
+    "api": [],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  },
+  {
+    "id": "terms",
+    "group": "說明與政策",
+    "name": "服務條款",
+    "route": "/terms",
+    "layout": "article",
+    "goal": "提供服務條款資訊與相關下一步。",
+    "blocks": [
+      {
+        "position": "left",
+        "title": "章節導覽",
+        "lines": [
+          "可點選章節／分類錨點",
+          "手機改上方橫向換行分類"
+        ],
+        "actions": [],
+        "kind": "content"
+      },
+      {
+        "position": "main",
+        "title": "服務條款",
+        "lines": [
+          "預約成立與商品保留時點",
+          "TWD 價格、報到核銷、租借歸還",
+          "AI 效果與實拍交付差異",
+          "正式商家與條款文字待提供，不以線框充作法律文件"
+        ],
+        "actions": [
+          {
+            "label": "探索方案",
+            "target": "plans",
+            "effect": "需要會員操作時先登入"
+          }
+        ],
+        "kind": "content"
+      },
+      {
+        "position": "bottom",
+        "title": "相關連結",
+        "lines": [
+          "使用流程／FAQ／隱私／取消退款／條款"
+        ],
+        "actions": [
+          {
+            "label": "聯絡商家",
+            "target": "contact",
+            "effect": "顯示正式聯絡資訊"
+          }
+        ],
+        "kind": "content"
+      }
+    ],
+    "rules": [
+      "正式內容與商家聯絡資料待補；線框只定義版位",
+      "FAQ 搜尋、三語系及行事曆等 11/16 項目不先冒充可用",
+      "政策頁閱讀不觸發同意或登入"
+    ],
+    "api": [],
+    "access": "公開",
+    "phase": "10/26",
+    "source": "01 產品與體驗規劃／04 會員流程／07 User Flow"
+  }
+]

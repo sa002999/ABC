@@ -1,0 +1,55 @@
+﻿number,screen_id,name,react_file,ui_scope,service_status,source
+1,home,首頁,src/pages/Home.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+2,plans,探索方案,src/pages/Plans.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+3,detail,方案／和服詳情,src/pages/Plans.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+4,photo-compare,外拍方案比較,src/pages/Information.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+5,stores,門市列表,src/pages/Information.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+6,store-detail,門市詳情,src/pages/Information.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+7,login,登入,src/pages/Auth.tsx,共用 React 畫面／步驟／狀態已建立,Firebase SDK 已接入；會員驗證由使用者操作,src/data/screens.json
+8,register,註冊,src/pages/Auth.tsx,共用 React 畫面／步驟／狀態已建立,Firebase SDK 已接入；會員驗證由使用者操作,src/data/screens.json
+9,verify,Email 驗證,src/pages/Auth.tsx,共用 React 畫面／步驟／狀態已建立,Firebase SDK 已接入；會員驗證由使用者操作,src/data/screens.json
+10,reset,忘記／重設密碼,src/pages/Auth.tsx,共用 React 畫面／步驟／狀態已建立,Firebase SDK 已接入；會員驗證由使用者操作,src/data/screens.json
+11,tryon,AI 試穿：人物與搭配,src/pages/TryOn.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+12,tryon-working,AI 生成中,src/pages/TryOn.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+13,tryon-result,AI 試穿結果,src/pages/TryOn.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+14,scene,外拍場景生成確認,src/pages/TryOn.tsx,已成功任務的場景確認；預製圖直接合成待補契約,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+15,scene-result,外拍場景結果,src/pages/TryOn.tsx,結果共用試穿圖框，真實場景待驗證,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+16,generations,我的生成圖,src/pages/Account.tsx,列表／刪除介面；原圖圖庫與跨裝置重用待補,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+17,looks,我的造型收藏,src/pages/Account.tsx,列表／取消／比較初版；版本更新與帶入解析待契約,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+18,looks-compare,和服方案比較,src/pages/Account.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+19,booking-store,預約 1／7：地區與門市,src/pages/Booking.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+20,booking-date,預約 2／7：日期與時段,src/pages/Booking.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+21,booking-guests,預約 3／7：旅客人數,src/pages/Booking.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+22,booking-outfits,預約 4／7：逐人方案與造型,src/pages/Booking.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+23,booking-addons,預約 5／7：攝影與加值,src/pages/Booking.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+24,booking-contact,預約 6／7：聯絡資料,src/pages/Booking.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+25,booking-review,預約 7／7：摘要與政策確認,src/pages/Booking.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+26,payment,信用卡付款,src/pages/Booking.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+27,payment-pending,付款確認中,src/pages/Booking.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+28,payment-failed,付款失敗／暫留到期,src/pages/Booking.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+29,booking-complete,預約完成,src/pages/Booking.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+30,bookings,我的預約列表,src/pages/Account.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+31,booking-detail,我的預約詳情,src/pages/Account.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+32,cancel-booking,取消預約確認,src/pages/Account.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+33,voucher,到店動態票券,src/pages/Account.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+34,account,會員帳號總覽,src/pages/Account.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+35,mcp,MCP 連線與 token,src/pages/Account.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+36,delete-account,永久刪除帳號,src/pages/Account.tsx,條件檢查與確認；敏感重新驗證／背景清除待整合,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+37,admin-login,後台登入,src/pages/Admin.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+38,admin-bookings,預約管理列表,src/pages/Admin.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+39,admin-detail,預約詳情與處理,src/pages/Admin.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+40,admin-checkin,本人報到與 QR 核銷,src/pages/Admin.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+41,admin-inventory,實體庫存列表,src/pages/Admin.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+42,admin-inventory-detail,庫存詳情、整備與調撥,src/pages/Admin.tsx,詳情／整備初版；調撥及腰帶數量模型待補,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+43,admin-rentals,出借與歸還,src/pages/Admin.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+44,admin-slots,接待與攝影名額,src/pages/Admin.tsx,場次列表／新增；完整容量修改待補,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+45,admin-catalog,商品、方案與價格,src/pages/Admin.tsx,共用 React 畫面／步驟／狀態已建立,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+46,admin-editor,商品／方案編輯,src/pages/Admin.tsx,基本新增表單；完整編輯／素材上傳待補,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+47,admin-refund,取消與退款處理,src/pages/Admin.tsx,取消／退款初版；金額試算及權限待後端驗證,尚未接真實業務 API／未做端到端驗收,src/data/screens.json
+48,guide,使用流程,src/pages/Information.tsx,共用 React 畫面／步驟／狀態已建立,靜態內容；正式商家資料待確認,src/data/screens.json
+49,faq,常見問題,src/pages/Information.tsx,共用 React 畫面／步驟／狀態已建立,靜態內容；正式商家資料待確認,src/data/screens.json
+50,about,關於 KINU TABI,src/pages/Information.tsx,共用 React 畫面／步驟／狀態已建立,靜態內容；正式商家資料待確認,src/data/screens.json
+51,contact,聯絡我們,src/pages/Information.tsx,共用 React 畫面／步驟／狀態已建立,靜態內容；正式商家資料待確認,src/data/screens.json
+52,privacy,隱私權政策,src/pages/Information.tsx,共用 React 畫面／步驟／狀態已建立,靜態內容；正式商家資料待確認,src/data/screens.json
+53,cancellation,取消與退款,src/pages/Information.tsx,共用 React 畫面／步驟／狀態已建立,靜態內容；正式商家資料待確認,src/data/screens.json
+54,terms,服務條款,src/pages/Information.tsx,共用 React 畫面／步驟／狀態已建立,靜態內容；正式商家資料待確認,src/data/screens.json
