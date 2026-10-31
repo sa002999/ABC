@@ -1,5 +1,5 @@
-# Backend packaging and generated verification artifacts
+# Backend packaging and local runtime artifacts
 build/
 wheels/
 *.egg-info
-verification/
+var/

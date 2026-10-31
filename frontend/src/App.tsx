@@ -14,7 +14,7 @@ const Account = lazy(() => import('./pages/Account').then(m => ({ default: m.Acc
 const Bookings = lazy(() => import('./pages/Account').then(m => ({ default: m.Bookings })))
 const BookingDetail = lazy(() => import('./pages/Account').then(m => ({ default: m.BookingDetail })))
 const Generations = lazy(() => import('./pages/Account').then(m => ({ default: m.Generations })))
-const MCP = lazy(() => import('./pages/Account').then(m => ({ default: m.MCP })))
+const MCP = lazy(() => import('./pages/MCPAccount').then(m => ({ default: m.MCP })))
 const Admin = lazy(() => import('./pages/Admin').then(m => ({ default: m.Admin })))
 const Information = lazy(() => import('./pages/Information').then(m => ({ default: m.Information })))
 const Stores = lazy(() => import('./pages/Information').then(m => ({ default: m.Stores })))

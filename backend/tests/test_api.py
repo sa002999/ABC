@@ -4,8 +4,9 @@ import unittest
 import psycopg
 from fastapi.testclient import TestClient
 
-from app import app, get_connection
-from database import connect
+from app.core.database import get_connection
+from app.main import app
+from app.core.database import connect
 
 
 class ApiTests(unittest.TestCase):

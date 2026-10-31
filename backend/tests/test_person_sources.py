@@ -2,17 +2,17 @@ import os
 import unittest
 from io import BytesIO
 from unittest.mock import patch
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from PIL import Image
 from fastapi.testclient import TestClient
 
-from app import app
-from auth import current_identity
-from database import connect, get_connection
-from photo_checks import InvalidPhoto, normalize_photo
-from person_sources import CONSENT_VERSION
-from seed_catalog import identifier
+from app.main import app
+from app.modules.accounts.dependencies import current_identity
+from app.core.database import connect, get_connection
+from app.modules.try_on.photos import InvalidPhoto, normalize_photo
+from app.modules.try_on.photos import CONSENT_VERSION
+from commands.seeds.catalog import identifier
 
 
 def image_bytes(size=(800, 1200), format='JPEG', **options):
@@ -50,6 +50,10 @@ class PhotoFileTests(unittest.TestCase):
                 response = client.request(method, '/api/try-on/sessions'+suffix, json=body)
                 self.assertEqual(response.status_code, 401)
                 self.assertEqual(response.headers['cache-control'], 'no-store')
+            for method,path in [('GET','/api/try-on/photos'),('DELETE','/api/try-on/photos/'+str(uuid4()))]:
+                response=client.request(method,path)
+                self.assertEqual(response.status_code,401)
+                self.assertEqual(response.headers['cache-control'],'no-store')
 
 
 @unittest.skipUnless(os.getenv('RUN_DATABASE_TESTS') == '1', 'Set RUN_DATABASE_TESTS=1 for RDS')
@@ -63,12 +67,14 @@ class PersonSourceIntegrationTests(unittest.TestCase):
         app.dependency_overrides[current_identity] = lambda: self.identity
         self.client = TestClient(app)
         self.client.put('/api/account', json={}).raise_for_status()
-        self.patches = [patch('person_sources.ensure_private_storage', return_value=False),
-            patch('person_sources.check_upload_cors'), patch('person_sources.cleanup_photos'),
-            patch('person_sources.preview_url', return_value='https://example.com/private-preview'),
-            patch('person_sources.s3_client')]
+        self.patches = [patch('app.modules.try_on.photos.ensure_private_storage', return_value=False),
+            patch('app.modules.try_on.photos.check_upload_cors'), patch('app.modules.try_on.photos.cleanup_photos'),
+            patch('app.modules.try_on.photos.preview_url', return_value='https://example.com/private-preview'),
+            patch('app.modules.try_on.photos.pose_issue', return_value=None),
+            patch('app.modules.try_on.photos.s3_client')]
         self.mocks = [p.start() for p in self.patches]
         self.storage = self.mocks[-1].return_value
+        self.pose = self.mocks[-2]
         self.storage.generate_presigned_post.return_value = {'url':'https://example.com/upload','fields':{'key':'private/test'}}
 
     def tearDown(self):
@@ -79,7 +85,7 @@ class PersonSourceIntegrationTests(unittest.TestCase):
         self.connection.close()
 
     def selection(self):
-        return {'planId':str(identifier('plan','RKH0002')), 'kimonoId':str(identifier('kimono','RKH0002'))}
+        return {'planId':str(UUID('30000000-0000-4000-8000-000000000011')), 'kimonoId':str(identifier('kimono','RKH0002'))}
 
     def create(self):
         response = self.client.post('/api/try-on/sessions', json={**self.selection(), 'source':'SELF',
@@ -87,8 +93,8 @@ class PersonSourceIntegrationTests(unittest.TestCase):
         self.assertEqual(response.status_code, 201, response.text)
         return '/api/try-on/sessions/'+response.json()['sessionId']
 
-    def upload(self, path, content):
-        response = self.client.post(path+'/upload-url', json={'contentType':'image/jpeg','size':len(content),'fileName':'test.jpg'})
+    def upload(self, path, content, replace_id=None):
+        response = self.client.post(path+'/upload-url', json={'contentType':'image/jpeg','size':len(content),'fileName':'test.jpg','replacePhotoId':replace_id})
         self.assertEqual(response.status_code, 200, response.text)
         self.storage.head_object.return_value = {'ContentLength':len(content)}
         self.storage.get_object.return_value = {'Body':BytesIO(content)}
@@ -100,7 +106,9 @@ class PersonSourceIntegrationTests(unittest.TestCase):
         response = self.client.post('/api/try-on/sessions', json={**self.selection(),'source':'SELF'})
         self.assertEqual(response.status_code, 403)
         models = self.client.get('/api/models').json()['data']
-        self.assertEqual(len(models), 3)
+        self.assertEqual(len(models), 6)
+        self.assertEqual([m['role'] for m in models].count('FEMALE'),3)
+        self.assertEqual([m['role'] for m in models].count('MALE'),3)
         self.assertNotIn('sourceKey', models[0])
         model = self.client.post('/api/try-on/sessions', json={**self.selection(),'source':'MODEL','modelId':models[0]['id']})
         self.assertEqual(model.status_code, 201, model.text)
@@ -116,11 +124,53 @@ class PersonSourceIntegrationTests(unittest.TestCase):
             ('POST','/validate',{'photoId':str(uuid4())})]:
             self.assertEqual(self.client.request(method,path+suffix,json=body).status_code,404)
 
+    def test_library_limit_targeted_replacement_and_shared_originals(self):
+        first=self.upload(self.create(),image_bytes())
+        second=self.upload(self.create(),image_bytes())
+        third=self.upload(self.create(),image_bytes())
+        original_ids={p['photoId'] for p in [first,second,third]}
+        self.assertEqual({p['photoId'] for p in self.client.get('/api/try-on/photos').json()['data']},original_ids)
+        extra=self.create()
+        ticket=self.client.post(extra+'/upload-url',json={'contentType':'image/jpeg','size':100,'fileName':'fourth.jpg'})
+        self.assertEqual(ticket.status_code,409,ticket.text)
+        self.assertEqual(ticket.json()['error']['code'],'PHOTO_LIMIT_REACHED')
+        shared=self.client.post('/api/try-on/sessions',json={**self.selection(),'source':'SELF','photoId':second['photoId']})
+        self.assertEqual(shared.status_code,201,shared.text)
+        self.assertEqual(shared.json()['photo']['photoId'],second['photoId'])
+        rejected=self.upload(extra,b'bad image',second['photoId'])
+        self.assertEqual(rejected['status'],'REJECTED')
+        self.assertEqual({p['photoId'] for p in self.client.get('/api/try-on/photos').json()['data']},original_ids)
+        replacement=self.upload(extra,image_bytes(),second['photoId'])
+        current=self.client.get('/api/try-on/photos').json()['data']
+        self.assertEqual({p['photoId'] for p in current},{first['photoId'],third['photoId'],replacement['photoId']})
+        self.assertIsNone(self.client.get('/api/try-on/sessions/'+shared.json()['sessionId']).json()['photo'])
+        self.assertEqual(self.connection.execute('SELECT status FROM person_photos WHERE id=%s',(second['photoId'],)).fetchone()['status'],'DELETED')
+        self.assertEqual(self.client.delete('/api/try-on/photos/'+third['photoId']).status_code,202)
+        self.assertEqual(len(self.client.get('/api/try-on/photos').json()['data']),2)
+        self.assertEqual(self.upload(self.create(),image_bytes())['status'],'READY')
+
+    def test_library_is_private_and_only_originals_are_accepted(self):
+        photo=self.upload(self.create(),image_bytes())
+        self.assertEqual(self.client.post('/api/try-on/sessions',json={**self.selection(),'source':'SELF','photoId':str(uuid4())}).status_code,404)
+        models=self.client.get('/api/models').json()['data']
+        male=next(m for m in models if m['role']=='MALE')
+        mismatch=self.client.post('/api/try-on/sessions',json={**self.selection(),'source':'MODEL','modelId':male['id']})
+        self.assertEqual(mismatch.status_code,422,mismatch.text)
+        male_selection={**self.selection(),'kimonoId':str(identifier('kimono','RKM0001'))}
+        self.assertEqual(self.client.post('/api/try-on/sessions',json={**male_selection,'source':'MODEL','modelId':male['id']}).status_code,201)
+        self.identity['uid']='other-library-'+str(uuid4());self.client.put('/api/account',json={}).raise_for_status()
+        self.assertEqual(self.client.get('/api/try-on/photos').json()['data'],[])
+        self.assertEqual(self.client.delete('/api/try-on/photos/'+photo['photoId']).status_code,404)
+        self.assertEqual(self.client.post('/api/try-on/sessions',json={**self.selection(),'source':'SELF','photoId':photo['photoId']}).status_code,404)
+        path=self.create()
+        response=self.client.post(path+'/upload-url',json={'contentType':'image/jpeg','size':100,'fileName':'x.jpg','replacePhotoId':photo['photoId']})
+        self.assertEqual(response.status_code,404)
+
     def test_upload_rejection_replacement_reuse_and_withdrawal(self):
         path = self.create()
         first = self.upload(path,image_bytes())
-        self.assertEqual(first['status'],'FILE_READY')
-        self.assertEqual(first['qualityStatus'],'PENDING')
+        self.assertEqual(first['status'],'READY')
+        self.assertEqual(first['qualityStatus'],'PASSED')
         rejected = self.upload(path,b'bad image')
         self.assertEqual(rejected['status'],'REJECTED')
         self.assertEqual(self.client.get(path).json()['photo']['photoId'],first['photoId'])
@@ -134,6 +184,66 @@ class PersonSourceIntegrationTests(unittest.TestCase):
         self.assertIsNone(current['photo'])
         self.assertEqual(current['consentStatus'],'REVOKED')
         self.assertEqual(self.client.post(path+'/upload-url',json={'contentType':'image/jpeg','size':100,'fileName':'x.jpg'}).status_code,403)
+
+    def test_pose_rejection_preserves_original_and_blocks_generation(self):
+        path = self.create()
+        original = self.upload(path, image_bytes())
+        for code in ['NO_PERSON', 'MULTIPLE_PEOPLE', 'BODY_CROPPED']:
+            with self.subTest(code=code):
+                self.pose.return_value = code
+                self.storage.put_object.reset_mock()
+                rejected = self.upload(path, image_bytes(), original['photoId'])
+                self.assertEqual(rejected['status'], 'REJECTED')
+                self.assertEqual(rejected['issues'][0]['code'], code)
+                self.assertIsNone(rejected['previewUrl'])
+                self.storage.put_object.assert_not_called()
+                self.assertEqual(self.client.get(path).json()['photo']['photoId'], original['photoId'])
+                self.assertEqual([p['photoId'] for p in self.client.get('/api/try-on/photos').json()['data']], [original['photoId']])
+                response = self.client.post(path+'/generations', json={**self.selection(), 'photoId':rejected['photoId'], 'confirmed':True},
+                                            headers={'Idempotency-Key':str(uuid4())})
+                self.assertEqual(response.status_code, 409, response.text)
+                response = self.client.post('/api/try-on/sessions', json={**self.selection(), 'source':'SELF', 'photoId':rejected['photoId']})
+                self.assertEqual(response.status_code, 404, response.text)
+        self.assertEqual(self.client.get('/api/account/generation-usage').json()['website']['used'], 0)
+        self.assertEqual(self.client.get('/api/try-on/generations').json()['data'], [])
+
+    def test_pose_service_failure_can_retry_and_preserves_original(self):
+        path = self.create()
+        original = self.upload(path, image_bytes())
+        content = image_bytes()
+        ticket = self.client.post(path+'/upload-url', json={'contentType':'image/jpeg', 'size':len(content),
+            'fileName':'test.jpg', 'replacePhotoId':original['photoId']}).json()
+        self.storage.head_object.return_value = {'ContentLength':len(content)}
+        self.storage.get_object.return_value = {'Body':BytesIO(content)}
+        self.storage.put_object.reset_mock()
+        self.pose.side_effect = RuntimeError('private-model-path must not escape')
+        response = self.client.post(path+'/validate', json={'photoId':ticket['photoId']})
+        self.assertEqual(response.status_code, 503, response.text)
+        self.assertEqual(response.json()['error']['code'], 'PHOTO_VALIDATION_UNAVAILABLE')
+        self.assertNotIn('private-model-path', response.text)
+        self.assertEqual(self.connection.execute('SELECT status FROM person_photos WHERE id=%s', (ticket['photoId'],)).fetchone()['status'], 'PENDING')
+        self.storage.put_object.assert_not_called()
+        self.assertEqual(self.client.get(path).json()['photo']['photoId'], original['photoId'])
+        self.pose.side_effect = None
+        self.storage.get_object.return_value = {'Body':BytesIO(content)}
+        response = self.client.post(path+'/validate', json={'photoId':ticket['photoId']})
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()['status'], 'READY')
+        self.assertEqual(self.client.get(path).json()['photo']['photoId'], ticket['photoId'])
+
+    def test_legacy_photos_remain_usable_without_rechecking(self):
+        path = self.create()
+        photo = self.upload(path, image_bytes())
+        self.connection.execute("UPDATE person_photos SET status='FILE_READY' WHERE id=%s", (photo['photoId'],))
+        self.connection.execute("UPDATE try_on_sessions SET consent_version='photo-consent-2026-10-23-scenes' WHERE id=%s", (path.rsplit('/',1)[-1],))
+        self.pose.reset_mock()
+        self.pose.side_effect = AssertionError('Legacy photos must not be checked')
+        response = self.client.post(path+'/validate', json={'photoId':photo['photoId']})
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()['status'], 'FILE_READY')
+        response = self.client.post('/api/try-on/sessions', json={**self.selection(), 'source':'SELF', 'photoId':photo['photoId']})
+        self.assertEqual(response.status_code, 201, response.text)
+        self.pose.assert_not_called()
 
     def test_authenticated_api_transfer_when_vite_cors_is_unavailable(self):
         from fastapi import HTTPException
@@ -154,15 +264,15 @@ class PersonSourceIntegrationTests(unittest.TestCase):
     @unittest.skipUnless(os.getenv('RUN_PHOTO_STORAGE_TESTS') == '1', 'Opt-in real S3 upload test')
     def test_real_s3_direct_upload_and_private_preview(self):
         import httpx
-        from photo_storage import ensure_private_storage, check_upload_cors, private_bucket, remove_key, preview_url
-        from storage import s3_client
+        from app.integrations.s3 import ensure_private_storage, check_upload_cors, private_bucket, remove_key, preview_url
+        from app.integrations.s3 import s3_client
         versioned = ensure_private_storage()
         check_upload_cors('http://127.0.0.1:8010')
         client = s3_client()
         path = self.create()
         keys = []
         try:
-            with patch('person_sources.s3_client', return_value=client):
+            with patch('app.modules.try_on.photos.s3_client', return_value=client):
                 content = image_bytes()
                 response = self.client.post(path+'/upload-url', json={'contentType':'image/jpeg','size':len(content),'fileName':'synthetic-test.jpg'})
                 self.assertEqual(response.status_code,200,response.text)
@@ -173,7 +283,7 @@ class PersonSourceIntegrationTests(unittest.TestCase):
                 self.assertIn(sent.status_code,(200,201,204))
                 validated = self.client.post(path+'/validate',json={'photoId':data['photoId']})
                 self.assertEqual(validated.status_code,200,validated.text)
-                self.assertEqual(validated.json()['status'],'FILE_READY')
+                self.assertEqual(validated.json()['status'],'READY')
                 preview = httpx.get(preview_url(row['preview_key']),timeout=20)
                 self.assertEqual(preview.status_code,200)
                 self.assertEqual(preview.headers['content-type'],'image/webp')

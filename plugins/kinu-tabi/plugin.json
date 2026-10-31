@@ -1,0 +1,18 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "kinu-tabi",
+  "version": "0.1.2",
+  "description": "探索 KINU TABI 和服方案、逐人搭配，連接本人會員並準備 AI 試穿。",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "KINU TABI",
+        "shortDescription": "和服方案、會員連線與 AI 試穿",
+        "category": "Travel",
+        "longDescription": "連接本機 KINU TABI HTTP MCP Server，探索和服方案、檢查全員搭配，並以本人會員授權選擇試穿人物及確認生成。",
+        "capabilities": ["Interactive"],
+        "defaultPrompt": "請用 KINU TABI 幫我們探索和服方案並逐人選款。"
+      }
+    }
+  }
+}

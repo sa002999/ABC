@@ -28,7 +28,7 @@ export function useResource<T>(path: string, fallback: T, token?: string, enable
     return () => controller.abort()
     // Callers keep fallback stable; path/token changes define resource identity.
   }, [path, token, version, enabled])
-  return { data, loading, error, reload: () => setVersion(v => v + 1), example: !apiConfigured }
+  return { data, setData, loading, error, reload: () => setVersion(v => v + 1), example: !apiConfigured }
 }
 
 export function usePrivateResource<T>(path: string, fallback: T) {

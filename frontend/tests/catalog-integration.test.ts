@@ -10,15 +10,21 @@ describe('React 與 FastAPI 商業規則',()=>{
   expect(plan).toMatchObject({id:raw.id,name:'情侶套餐',price:2800,additionalGuestPrice:1500,city:'kyoto',storeIds:['kyoto']})
   expect(()=>adaptPlan({...raw,currency:'JPY'})).toThrow()
  })
- it('情侶套餐只計一次、第三位與女生腰帶分別加價',()=>{
-  const people=[...participantsFor(plan),{id:'third',role:'FEMALE' as const,kimonoId:'female',beltId:'belt'}]
+ it('情侶固定兩人、團體按每人1400計價並保留三位旅客搭配',()=>{
+  const people=participantsFor(plan)
   const belts:Belt[]=[{id:'belt',name:'腰帶',category:'BELT',price:200}]
-  expect(estimatePrice(plan,people,belts,false)).toBe(4500)
- })
- it('單人方案多人同行仍按方案單價逐人計算',()=>{
-  const single=adaptPlan({...raw,kind:'SINGLE',basePrice:1800,additionalGuestPrice:1500})
-  const people=[...participantsFor(single),{id:'second',role:'MALE' as const,kimonoId:'male',beltId:null}]
-  expect(estimatePrice(single,people,[],false)).toBe(3600)
+  people[0].beltId='belt'
+  expect(estimatePrice(plan,people,belts,false)).toBe(3000)
+  expect(()=>estimatePrice(plan,[...people,{id:'third',role:'FEMALE',kimonoId:'female',beltId:null}],belts,false)).toThrow('人數')
+  const group=adaptPlan({...raw,kind:'GROUP',basePrice:1400,coverImageUrl:'/assets/plan-group.webp'})
+  const trio=[...participantsFor(group),{id:'third',role:'MALE' as const,kimonoId:'male',beltId:null}]
+  expect(estimatePrice(group,trio.slice(0,2),[],false)).toBe(2800)
+  expect(estimatePrice(group,trio,[],false)).toBe(4200)
+  expect(selectionFromQuery(group,selectionQuery(group,trio))).toEqual(trio)
+  expect(group.image).toBe('/assets/plan-group.webp')
+  expect(()=>estimatePrice(group,trio.slice(0,1),[],false)).toThrow('人數')
+  const single=adaptPlan({...raw,kind:'SINGLE'})
+  expect(()=>estimatePrice(single,trio.slice(0,2),[],false)).toThrow('人數')
  })
  it('雙人照片對應的旅客與搭配可帶入預約',()=>{
   const people=participantsFor(plan).map(p=>({...p,kimonoId:p.role==='MALE'?'male':'female',beltId:p.role==='FEMALE'?'belt':null}))

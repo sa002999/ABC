@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KINU TABI 方案探索</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;padding:20px;color:var(--color-text-primary,#292e29);background:var(--color-background-primary,#fcfaf6);font:15px/1.65 system-ui,sans-serif}
+    main{max-width:880px;margin:auto}h1,h2,h3,p{margin:0 0 12px}h1{font:500 25px/1.4 Georgia,serif}h2{font-size:20px}h3{font-size:17px}.eyebrow{font-size:11px;letter-spacing:.16em;color:var(--color-text-secondary,#59655d)}
+    form{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}label{display:grid;gap:4px;font-size:13px}input,select,button{font:inherit;color:inherit;border:1px solid var(--color-border-primary,#b8beb4);border-radius:4px;background:var(--color-background-primary,#fff);padding:9px 12px}input{width:180px}button{cursor:pointer}button.primary{background:#334e40;color:#fff;border-color:#334e40}button:disabled{cursor:default;opacity:.5}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #b38144;outline-offset:3px}
+    #plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:18px}article{border-top:1px solid var(--color-border-primary,#d7dbd3);padding-top:14px}article img{display:block;width:100%;height:220px;object-fit:cover;margin-bottom:12px}article button{margin-top:8px;width:100%}.muted{color:var(--color-text-secondary,#59655d);font-size:13px}.price{font-size:18px}.demo{font-size:12px;color:var(--color-text-secondary,#6c5934)}#notice,#status{font-size:13px;margin:12px 0}#status[data-error=true]{color:#a33424}#selection{margin:22px 0;padding-top:18px;border-top:2px solid #718472}#selection img{max-width:100%;max-height:320px;object-fit:contain}#pagination{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:20px}[hidden]{display:none!important}@media(max-width:400px){body{padding:12px}input{width:100%}label.keyword{width:100%}}
+  </style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">KINU TABI · KIMONO EXPERIENCE</p>
+  <h1>先找到適合的和服方案</h1>
+  <p class="muted">探索方案 → 逐人挑款 → 檢查共同門市 → 查全員日期與時段。會員可選用 AI 試穿；查詢與選時段不保留庫存或建立預約。</p>
+  <form id="filters">
+    <label>城市<select id="city"><option value="KYOTO">京都</option><option value="TOKYO">東京</option></select></label>
+    <label>成人總人數<select id="party-size"><option value="1">1 位</option><option value="2">2 位</option><option value="3">3 位</option></select></label>
+    <label class="keyword">關鍵字<input id="keyword" maxlength="100" placeholder="方案名稱或關鍵字"></label>
+    <label>排序<select id="sort"><option value="recommended">推薦順序</option><option value="priceAsc">基礎價由低到高</option><option value="priceDesc">基礎價由高到低</option></select></label>
+    <button id="search" type="button" class="primary" disabled>查詢方案</button>
+  </form>
+  <p id="status" role="status" aria-live="polite">正在連接 AI 對話介面…</p>
+  <p id="notice"></p>
+  <section id="selection" aria-label="目前選擇" hidden></section>
+  <section id="outfits" aria-label="逐人挑款" hidden></section>
+  <section id="plans" aria-label="方案列表"></section>
+  <nav id="pagination" aria-label="方案分頁"><button id="previous" disabled>上一頁</button><span id="page" class="muted"></span><button id="next" disabled>下一頁</button></nav>
+</main>
+<!-- APP_SCRIPT -->
+</body>
+</html>

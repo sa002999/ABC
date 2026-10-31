@@ -1,11 +1,13 @@
 import os
 import unittest
+from uuid import UUID
 
 from fastapi.testclient import TestClient
 
-from app import app, get_connection
-from database import connect
-from seed_catalog import identifier
+from app.core.database import get_connection
+from app.main import app
+from app.core.database import connect
+from commands.seeds.catalog import identifier
 
 
 class CatalogValidationTests(unittest.TestCase):
@@ -44,23 +46,23 @@ class CatalogIntegrationTests(unittest.TestCase):
     def test_city_assignment_and_combined_filters(self):
         kyoto = self.plans('?city=KYOTO')
         tokyo = self.plans('?city=TOKYO')
-        self.assertEqual({p['kimono']['sku'] for p in kyoto['data']}, {'RKH0002', 'RKH0057', 'RKH0103'})
-        self.assertEqual({p['kimono']['sku'] for p in tokyo['data']}, {'RKH0002', 'RKH0057', 'RKH0103'})
-        filtered = self.plans('?city=KYOTO&style=ROMANTIC&audience=FAMILY&minPrice=1600&maxPrice=1900')
-        self.assertEqual([p['kimono']['sku'] for p in filtered['data']], ['RKH0057'])
+        self.assertEqual({p['kind'] for p in kyoto['data']}, {'SINGLE', 'COUPLE', 'GROUP'})
+        self.assertEqual({p['kind'] for p in tokyo['data']}, {'SINGLE', 'COUPLE', 'GROUP'})
+        filtered = self.plans('?city=KYOTO&audience=GROUP&minPrice=1300&maxPrice=1500')
+        self.assertEqual([p['kind'] for p in filtered['data']], ['GROUP'])
         self.assertTrue(all('ELEGANT' in p['kimono']['styleTags'] for p in self.plans('?city=TOKYO&style=ELEGANT')['data']))
         self.assertEqual(self.plans('?city=TOKYO&store=10000000-0000-4000-8000-000000000002')['data'], [])
 
     def test_pagination_sorting_and_literal_search(self):
         first = self.plans('?pageSize=2&sort=priceAsc')
         second = self.plans('?pageSize=2&page=1&sort=priceAsc')
-        self.assertEqual(first['total'], 4)
+        self.assertEqual(first['total'], 3)
         self.assertEqual(first['nextPage'], 1)
         self.assertIsNone(second['nextPage'])
-        self.assertEqual(len({p['id'] for p in first['data'] + second['data']}), 4)
-        self.assertEqual([p['basePrice'] for p in first['data']], [1500, 1800])
+        self.assertEqual(len({p['id'] for p in first['data'] + second['data']}), 3)
+        self.assertEqual([p['basePrice'] for p in first['data']], [1400, 1500])
         self.assertEqual(self.plans('?page=99')['data'], [])
-        self.assertEqual(self.plans('?keyword=RKH0002')['total'], 2)
+        self.assertEqual(self.plans('?keyword=RKH0002')['total'], 3)
         self.assertEqual(self.client.get('/api/plans', params={'keyword': '%'}).json()['total'], 0)
         self.assertEqual(self.client.get('/api/plans', params={'keyword': "' OR 1=1 --"}).json()['total'], 0)
 
@@ -72,7 +74,7 @@ class CatalogIntegrationTests(unittest.TestCase):
         self.assertNotIn('sizes',plan['kimono'])
         self.assertTrue(plan['isDemo'])
         self.assertEqual(self.client.get('/api/kimonos/' + plan['kimono']['id']).json(), plan['kimono'])
-        self.assertEqual(len(self.client.get('/api/kimonos?city=KYOTO').json()['data']), 3)
+        self.assertEqual(len(self.client.get('/api/kimonos?city=KYOTO').json()['data']), 6)
         image = plan['kimono']['images'][0]
         self.assertEqual(image['kind'], 'PRODUCT')
         response = self.client.get('/api/catalog-assets/' + image['id'], follow_redirects=False)
@@ -86,15 +88,31 @@ class CatalogIntegrationTests(unittest.TestCase):
         self.assertEqual(self.client.get('/assets/default%20models/person.jpg').status_code, 404)
         self.assertEqual(self.client.get('/backend/assets/default%20models/person.jpg').status_code, 404)
 
+    def test_gender_series_and_belt_images_are_selectable(self):
+        for city in ['KYOTO', 'TOKYO']:
+            garments = self.client.get('/api/kimonos', params={'city': city}).json()['data']
+            self.assertEqual({k['sku'] for k in garments if k['gender']=='FEMALE'}, {'RKH0002','RKH0057','RKH0103'})
+            self.assertEqual({k['sku'] for k in garments if k['gender']=='MALE'}, {'RKM0001','RKM0002','RKM0003'})
+            self.assertTrue(all(k['images'] and k['images'][0]['url'] for k in garments))
+        belts = self.client.get('/api/belts').json()['data']
+        self.assertEqual({b['sku'] for b in belts}, {'ROW0001','ROW0002','ROW0003'})
+        for belt in belts:
+            asset = self.connection.execute('SELECT id FROM product_assets WHERE accessory_id=%s', (belt['id'],)).fetchone()
+            self.assertTrue(belt['imageUrl'])
+            response = self.client.get('/api/catalog-assets/'+str(asset['id']), follow_redirects=False)
+            self.assertIn(response.status_code, (200,302))
+            self.connection.execute('UPDATE accessories SET active=false WHERE id=%s', (belt['id'],))
+            self.assertEqual(self.client.get('/api/catalog-assets/'+str(asset['id']), follow_redirects=False).status_code,404)
+
     def test_hidden_products_plans_and_stores_do_not_leak(self):
-        plan_id = identifier('plan', 'RKH0002')
+        plan_id = UUID('30000000-0000-4000-8000-000000000011')
         asset_url = '/api/catalog-assets/' + str(identifier('asset', 'RKH0002'))
         kimono_url = '/api/kimonos/' + str(identifier('kimono', 'RKH0002'))
         self.connection.execute('UPDATE plans SET active = false WHERE id = %s', (plan_id,))
         self.assertEqual(self.client.get('/api/plans/' + str(plan_id)).status_code, 404)
         self.assertIn(self.client.get(asset_url,follow_redirects=False).status_code,(200,302))
         self.assertEqual(self.client.get(kimono_url).status_code, 200)
-        self.assertEqual(self.plans()['total'], 3)
+        self.assertEqual(self.plans()['total'], 2)
         self.connection.execute('UPDATE plans SET active = true WHERE id = %s', (plan_id,))
         self.connection.execute('UPDATE kimonos SET active = false WHERE id = %s', (identifier('kimono', 'RKH0002'),))
         self.assertEqual(self.client.get('/api/plans/' + str(plan_id)).status_code, 404)

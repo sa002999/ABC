@@ -38,9 +38,10 @@ export function StoreDirectory() {
           const titleId = 'store-city-' + city.id
           const detailsId = 'store-info-' + city.id
           const stores = rows.filter(store => store.city.toLowerCase() === city.id)
+          const coverStore = stores.find(store => store.imageUrl)
           return <article key={city.id} aria-labelledby={titleId} className="border border-line">
             <div className="grid grid-cols-[.9fr_1fr]">
-              <img src={'/assets/' + city.image} alt={city.name + '風格參考，非正式店內照片'} className="h-full min-h-60 w-full object-cover md:aspect-[2/3]" />
+              <img src={coverStore?.imageUrl ?? '/assets/' + city.image} alt={coverStore ? coverStore.name + '門市照片' : city.name + '風格參考，非正式店內照片'} className="h-full min-h-60 w-full object-cover md:aspect-[2/3]" />
               <div className="flex flex-col items-start justify-center p-5 md:p-7">
                 <h2 id={titleId} className="font-serif text-xl">{city.name}</h2>
                 <p className="mt-3 text-xs leading-7 text-muted">{city.description}</p>

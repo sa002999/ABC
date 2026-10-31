@@ -9,9 +9,10 @@ import httpx
 from fastapi.testclient import TestClient
 from firebase_admin import auth
 
-from app import app
-from auth import firebase_app
-from database import BACKEND_DIR, connect, get_connection
+from app.main import app
+from app.integrations.firebase import firebase_app
+from app.core.config import BACKEND_DIR
+from app.core.database import connect, get_connection
 
 
 @unittest.skipUnless(os.getenv('RUN_FIREBASE_TESTS') == '1', 'Set RUN_FIREBASE_TESTS=1 for live Firebase')

@@ -3,23 +3,24 @@ import { useResource } from './hooks'
 import { participantsFor, type Belt, type Participant, type Kimono, type PhotographyOption, type Plan } from './domain'
 
 type RawKimono={id:string;name:unknown;gender:'FEMALE'|'MALE';images?:{url:string;kind:string}[]}
-export type ApiPlan={id:string;name:unknown;description:unknown;kind:'SINGLE'|'COUPLE';basePrice:number;additionalGuestPrice:number;currency:string;kimono:RawKimono;stores:{id:string;city:string}[];includedItems:string[];isDemo:boolean}
+export type ApiPlan={id:string;name:unknown;description:unknown;kind:'SINGLE'|'COUPLE'|'GROUP';coverImageUrl?:string|null;basePrice:number;additionalGuestPrice:number;currency:string;kimono:RawKimono;stores:{id:string;city:string}[];includedItems:string[];isDemo:boolean}
 export function adaptPlan(raw:ApiPlan):Plan {
  if(raw.currency!=='TWD'||!Number.isSafeInteger(raw.basePrice)||raw.basePrice<0||!raw.stores.length)throw new Error('方案資料格式不完整。')
  return {id:raw.id,name:localized(raw.name),description:localized(raw.description),kind:raw.kind,role:raw.kimono.gender,
- price:raw.basePrice,additionalGuestPrice:raw.kind==='COUPLE'?raw.additionalGuestPrice:raw.basePrice,image:assetUrl(raw.kimono.images?.find(a=>a.kind==='PRODUCT')?.url??''),
+ price:raw.basePrice,additionalGuestPrice:raw.additionalGuestPrice,image:assetUrl(raw.coverImageUrl??raw.kimono.images?.find(a=>a.kind==='PRODUCT')?.url??''),
  city:raw.stores[0].city.toLowerCase(),cities:[...new Set(raw.stores.map(s=>s.city.toLowerCase()))],storeIds:raw.stores.map(s=>s.id),
  kimonoId:raw.kimono.id,includedServices:raw.includedItems,isDemo:raw.isDemo}
 }
 export const canonicalPlanId=(id:string|null|undefined)=>id??''
 export function usePlans(_path='/api/plans'){return useResource<Plan[]>('/api/plans?pageSize=50',[],undefined,true,v=>(v as ApiPlan[]).map(adaptPlan))}
 export function usePlan(id:string|undefined){return useResource<Plan|null>('/api/plans/'+encodeURIComponent(id??''),null,undefined,!!id,v=>adaptPlan(v as ApiPlan))}
-export function useBelts(){return useResource<Belt[]>('/api/belts',[],undefined,true,v=>(v as {id:string;name:string;priceTwd:number}[]).map(b=>({...b,price:b.priceTwd,category:'BELT'})))}
+export function useBelts(){return useResource<Belt[]>('/api/belts',[],undefined,true,v=>(v as {id:string;name:string;priceTwd:number;imageUrl?:string|null}[]).map(b=>({...b,price:b.priceTwd,category:'BELT',imageUrl:assetUrl(b.imageUrl??'')})))}
 export function useKimonos(storeId=''){return useResource<Kimono[]>('/api/kimonos?pageSize=50'+(storeId?'&storeId='+encodeURIComponent(storeId):''),[],undefined,true,v=>(v as RawKimono[]).map(k=>({id:k.id,name:localized(k.name),gender:k.gender,color:'',imageUrl:assetUrl(k.images?.find(a=>a.kind==='PRODUCT')?.url??'')})))}
 export function usePhotography(_storeId=''){return useResource<PhotographyOption[]>('/api/photography-options',[])}
 export function selectedPlan(plans:Plan[],id:string|null){return id?plans.find(p=>p.id===id):plans[0]}
 export function selectionQuery(plan: Plan, people: Participant[]) {
   const query = new URLSearchParams({ plan: plan.id })
+  query.set('participants',JSON.stringify(people.map(({id,role,kimonoId,beltId})=>({id,role,kimonoId,beltId}))))
   for (const person of people) {
     if (person.role === 'FEMALE' && person.beltId) query.set('belt', person.beltId)
     if (plan.kind === 'COUPLE') query.set(person.role === 'FEMALE' ? 'femaleKimono' : 'maleKimono', person.kimonoId)
@@ -28,6 +29,14 @@ export function selectionQuery(plan: Plan, people: Participant[]) {
   return query
 }
 export function selectionFromQuery(plan: Plan, query: URLSearchParams): Participant[] {
+  try {
+    const saved=JSON.parse(query.get('participants')??'null') as Participant[]|null
+    if(saved&&Array.isArray(saved)&&(plan.kind==='GROUP'?[2,3]:plan.kind==='COUPLE'?[2]:[1]).includes(saved.length)
+      &&saved.every(p=>p&&typeof p.id==='string'&&['FEMALE','MALE'].includes(p.role)&&typeof p.kimonoId==='string'&&(p.beltId===null||typeof p.beltId==='string'))
+      &&new Set(saved.map(p=>p.id)).size===saved.length
+      &&(plan.kind!=='COUPLE'||saved[0].role==='FEMALE'&&saved[1].role==='MALE'))
+      return saved.map(({id,role,kimonoId,beltId})=>({id,role,kimonoId,beltId:role==='FEMALE'?beltId:null}))
+  }catch{}
   return participantsFor(plan).map(person => {
     const role = plan.kind === 'COUPLE' ? person.role : query.get('role') === 'MALE' || query.get('plan') === 'example-male' ? 'MALE' : plan.role
     return { ...person, role, kimonoId: query.get(plan.kind === 'COUPLE' ? role === 'FEMALE' ? 'femaleKimono' : 'maleKimono' : 'kimono') ?? '', beltId: role === 'FEMALE' ? query.get('belt') || null : null }

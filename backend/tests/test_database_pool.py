@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-import database
+from app.core import database
 
 
 class DatabasePoolTests(unittest.TestCase):

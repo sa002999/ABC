@@ -6,9 +6,9 @@ from uuid import uuid4
 from fastapi.testclient import TestClient
 from firebase_admin import auth
 
-from app import app
-from auth import current_identity
-from database import connect, get_connection
+from app.main import app
+from app.modules.accounts.dependencies import current_identity
+from app.core.database import connect, get_connection
 
 
 class AuthenticationTests(unittest.TestCase):
@@ -21,7 +21,7 @@ class AuthenticationTests(unittest.TestCase):
 
     def test_missing_invalid_and_unavailable_credentials(self):
         self.assertEqual(self.client.get('/api/account').status_code, 401)
-        with patch('auth.firebase_app', return_value=None), patch('auth.auth.verify_id_token') as verify:
+        with patch('app.modules.accounts.dependencies.firebase_app', return_value=None), patch('app.modules.accounts.dependencies.auth.verify_id_token') as verify:
             for error, status in [(auth.InvalidIdTokenError('bad'), 401),
                                   (auth.RevokedIdTokenError('revoked'), 401),
                                   (auth.UserDisabledError('disabled'), 401),

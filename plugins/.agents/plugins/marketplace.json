@@ -1,0 +1,11 @@
+{
+  "name": "kinu-tabi-local",
+  "plugins": [
+    {
+      "name": "kinu-tabi",
+      "source": { "source": "local", "path": "./kinu-tabi" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Travel"
+    }
+  ]
+}

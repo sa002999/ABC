@@ -1,17 +1,18 @@
 import os
 import unittest
 from datetime import datetime,timedelta,timezone
-from uuid import uuid4
+from uuid import UUID, uuid4
 from zoneinfo import ZoneInfo
 
 import psycopg
 from fastapi.testclient import TestClient
 
-from app import app
-from auth import current_identity
-from bookings import in_window,expire_holds
-from database import connect,get_connection
-from seed_catalog import identifier
+from app.main import app
+from app.modules.accounts.dependencies import current_identity
+from app.modules.bookings.queries import expire_holds
+from app.modules.bookings.rules import in_window
+from app.core.database import connect, get_connection
+from commands.seeds.catalog import identifier
 
 
 class BookingInputTests(unittest.TestCase):
@@ -44,7 +45,7 @@ class BookingIntegrationTests(unittest.TestCase):
 
     def body(self,count=1,slot=None):
         return {'storeId':str(self.store),'slotId':str(slot or self.slot['id']),
-            'guests':[{'guestType':'ADULT_FEMALE','planId':str(identifier('plan','RKH0002')),'kimonoId':str(identifier('kimono','RKH0002'))} for _ in range(count)],
+            'guests':[{'guestType':'ADULT_FEMALE','planId':'30000000-0000-4000-8000-000000000013' if count>1 else '30000000-0000-4000-8000-000000000011','kimonoId':str(identifier('kimono','RKH0002'))} for _ in range(count)],
             'contactName':'測試聯絡人','contactEmail':'test@example.com','contactPhone':'+886912345678'}
 
     def draft(self,body=None):
@@ -114,7 +115,7 @@ class BookingIntegrationTests(unittest.TestCase):
         updated=self.client.patch('/api/booking-drafts/'+bad['draftId'],json={**self.body(3),'version':bad['version']})
         self.assertEqual(updated.status_code,200,updated.text);good=updated.json()
         quoted=self.quote(good);self.assertEqual(quoted.status_code,200,quoted.text)
-        self.assertEqual(quoted.json()['total'],4500)
+        self.assertEqual(quoted.json()['total'],4200)
         self.connection.execute('UPDATE availability_slots SET capacity_total=2 WHERE id=%s',(self.slot['id'],))
         self.assertEqual(self.hold(good,quoted.json()).status_code,409)
         self.assertEqual(self.connection.execute('SELECT count(*) AS n FROM availability_holds WHERE draft_id=%s',(good['draftId'],)).fetchone()['n'],0)
@@ -136,7 +137,7 @@ class BookingIntegrationTests(unittest.TestCase):
         self.identity['email_verified']=False
         self.assertEqual(self.hold(draft,quoted).status_code,403)
         self.identity['email_verified']=True
-        self.connection.execute('UPDATE plans SET base_price=base_price+100 WHERE id=%s',(identifier('plan','RKH0002'),))
+        self.connection.execute('UPDATE plans SET base_price=base_price+100 WHERE id=%s',(UUID('30000000-0000-4000-8000-000000000011'),))
         changed=self.hold(draft,quoted);self.assertEqual(changed.status_code,409);self.assertEqual(changed.json()['error']['code'],'PRICE_CHANGED')
         q2=self.quote(draft).json();self.assertEqual(q2['total'],1600)
         held=self.hold(draft,q2).json()
@@ -145,7 +146,7 @@ class BookingIntegrationTests(unittest.TestCase):
 
     def test_cleaning_period_blocks_later_rentals(self):
         self.connection.execute("UPDATE inventory_items SET status='MAINTENANCE' WHERE kimono_id=%s AND code<>%s",(identifier('kimono','RKH0002'),'DEMO-RKH0002-001'))
-        self.connection.execute('UPDATE plans SET duration_minutes=60 WHERE id=%s',(identifier('plan','RKH0002'),))
+        self.connection.execute('UPDATE plans SET duration_minutes=60 WHERE id=%s',(UUID('30000000-0000-4000-8000-000000000011'),))
         start=self.slot['starts_at']
         ids=[]
         for hours in (2,3):
@@ -177,6 +178,7 @@ class BookingConcurrencyTests(unittest.TestCase):
                 c.execute("INSERT INTO kimonos(id,sku,name,kimono_type,is_demo) VALUES (%s,%s,'{\"zh-Hant\":\"測試和服\"}','KIMONO',true)",(kimono,'TEST-'+tag))
                 c.execute("INSERT INTO plans(id,slug,kimono_id,name,summary,description,audience,duration_minutes,base_price,is_demo) VALUES (%s,%s,%s,'{\"zh-Hant\":\"測試方案\"}','{}','{}',ARRAY['SOLO'],60,1000,true)",(plan,'test-'+tag,kimono))
                 c.execute('INSERT INTO plan_stores(plan_id,store_id) VALUES (%s,%s)',(plan,store))
+                c.execute('INSERT INTO plan_kimonos(plan_id,kimono_id) VALUES (%s,%s)',(plan,kimono))
                 c.execute('INSERT INTO availability_slots(id,store_id,starts_at,ends_at,capacity_total,is_demo) VALUES (%s,%s,%s,%s,2,true)',(slot,store,start,start+timedelta(minutes=30)))
                 c.execute("INSERT INTO inventory_items(id,code,store_id,kimono_id,is_demo) VALUES (%s,%s,%s,%s,true)",(inventory,'TEST-'+tag,store,kimono))
             app.dependency_overrides[current_identity]=identity
@@ -211,6 +213,7 @@ class BookingConcurrencyTests(unittest.TestCase):
                 c.execute('DELETE FROM availability_slots WHERE store_id=%s',(store,))
                 c.execute('DELETE FROM inventory_items WHERE id=%s',(inventory,))
                 c.execute('DELETE FROM plan_stores WHERE plan_id=%s',(plan,))
+                c.execute('DELETE FROM plan_kimonos WHERE plan_id=%s',(plan,))
                 c.execute('DELETE FROM plans WHERE id=%s',(plan,))
                 c.execute('DELETE FROM kimonos WHERE id=%s',(kimono,))
                 c.execute('DELETE FROM store_booking_settings WHERE store_id=%s',(store,))

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { exampleBelts, examplePlans } from '../src/data/catalog'
-import { estimatePrice, isPaidBooking, paymentLabel, localDate, participantsFor, safeReturnTo, secondsLeft, updateParticipant, validateParticipants } from '../src/lib/domain'
+import { displayJob, estimatePrice, isJobFailed, isPaidBooking, paymentLabel, localDate, participantsFor, safeReturnTo, secondsLeft, updateParticipant, validateParticipants } from '../src/lib/domain'
 
 describe('最新商品與情侶規則', () => {
   const couple = examplePlans.find(p => p.kind === 'COUPLE')!
@@ -36,6 +36,14 @@ describe('最新商品與情侶規則', () => {
   it('不選腰帶沒有額外配件費', () => {
     expect(estimatePrice(couple, participantsFor(couple), exampleBelts, false)).toBe(couple.price)
   })
+  it('更換人物或搭配時不沿用舊生成圖；已刪除的任務停止輪詢', () => {
+    const person = {id:'one',role:'FEMALE' as const,kimonoId:'k1',beltId:'b1',photoId:'p1',generationId:'old'}
+    for (const patch of [{beltId:'b2'},{kimonoId:'k2'},{photoId:'p2'},{role:'MALE' as const}]) {
+      expect(updateParticipant([person],'one',patch)[0].generationId).toBeUndefined()
+    }
+    expect(updateParticipant([person],'one',{beltId:'b1'})[0].generationId).toBe('old')
+    expect(isJobFailed('DELETED')).toBe(true)
+  })
 })
 
 describe('交易與返回邊界', () => {
@@ -65,4 +73,17 @@ describe('授權與請款分開顯示', () => {
     expect(paymentLabel('AUTHORIZED')).toBe('已授權、待請款')
     expect(paymentLabel('PAID')).toBe('已請款')
   })
+})
+
+describe('場景結果顯示',()=>{
+ it('場景未完成、失敗或缺少有效網址時保留原始試穿圖；切回不變更顯示原圖',()=>{
+  const base={jobId:'base',status:'SUCCEEDED',imageUrl:'base.jpg'}
+  for(const status of ['QUEUED','GENERATING','FAILED','EXPIRED','DELETED'])
+   expect(displayJob(base,{jobId:'scene',status,imageUrl:'scene.jpg'})).toBe(base)
+  expect(displayJob(base,{jobId:'scene',status:'SUCCEEDED'})).toBe(base)
+  expect(displayJob(base,undefined)).toBe(base)
+  const scene={jobId:'scene',status:'SUCCEEDED',imageUrl:'scene.jpg'}
+  expect(displayJob(base,scene)).toBe(scene)
+  expect(displayJob({...base,status:'EXPIRED',imageUrl:undefined},scene)).toBe(scene)
+ })
 })

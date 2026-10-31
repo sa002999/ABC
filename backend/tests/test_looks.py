@@ -1,13 +1,13 @@
 import os
 import unittest
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
 
-from app import app
-from auth import current_identity
-from database import connect, get_connection
-from seed_catalog import identifier
+from app.main import app
+from app.modules.accounts.dependencies import current_identity
+from app.core.database import connect, get_connection
+from commands.seeds.catalog import identifier
 
 
 class LooksAuthenticationTests(unittest.TestCase):
@@ -42,7 +42,7 @@ class LooksIntegrationTests(unittest.TestCase):
         self.connection.close()
 
     def selection(self, sku='RKH0002'):
-        return {'planId': str(identifier('plan', sku)), 'kimonoId': str(identifier('kimono', sku)),
+        return {'planId': str(UUID('30000000-0000-4000-8000-000000000011')), 'kimonoId': str(identifier('kimono', sku)),
                 'accessoryIds': [], 'sceneId': None, 'generationId': None}
 
     def create(self, sku='RKH0002'):
@@ -64,7 +64,7 @@ class LooksIntegrationTests(unittest.TestCase):
             self.assertEqual(replay.status_code, 200)
             self.assertEqual(replay.json()['lookId'], look['lookId'])
         self.assertEqual(self.client.post('/api/looks', json=self.selection('RKH0057'), headers=headers).status_code, 409)
-        self.connection.execute('UPDATE plans SET base_price=base_price+100 WHERE id=%s', (identifier('plan', 'RKH0002'),))
+        self.connection.execute('UPDATE plans SET base_price=base_price+100 WHERE id=%s', (UUID('30000000-0000-4000-8000-000000000011'),))
         with TestClient(app) as other_device:
             data = other_device.get('/api/looks').json()
             self.assertEqual(data['total'], 1)
@@ -93,7 +93,7 @@ class LooksIntegrationTests(unittest.TestCase):
                         {**self.selection(), 'userId': str(uuid4())},
                         {**self.selection(), 'currentPrice': 1}]:
             self.assertEqual(self.client.post('/api/looks', json=invalid).status_code, 422)
-        self.connection.execute('UPDATE plans SET active=false WHERE id=%s', (identifier('plan', 'RKH0002'),))
+        self.connection.execute('UPDATE plans SET active=false WHERE id=%s', (UUID('30000000-0000-4000-8000-000000000011'),))
         self.assertEqual(self.client.post('/api/looks', json=self.selection()).status_code, 422)
 
     def test_confirmed_update_version_and_duplicate_conflicts(self):
@@ -103,16 +103,16 @@ class LooksIntegrationTests(unittest.TestCase):
         changed = self.client.patch(path, json={**self.selection('RKH0103'), 'version': first['version']})
         self.assertEqual(changed.status_code, 200, changed.text)
         self.assertEqual(changed.json()['version'], 2)
-        self.assertEqual(changed.json()['planId'], str(identifier('plan','RKH0103')))
+        self.assertEqual(changed.json()['planId'], str(UUID('30000000-0000-4000-8000-000000000011')))
         self.assertEqual(self.client.patch(path, json={**self.selection(), 'version': 1}).status_code, 409)
         self.assertEqual(self.client.patch(path, json={**self.selection('RKH0057'), 'version': 2}).status_code, 409)
-        self.assertEqual(self.client.get(path).json()['planId'], str(identifier('plan','RKH0103')))
+        self.assertEqual(self.client.get(path).json()['planId'], str(UUID('30000000-0000-4000-8000-000000000011')))
 
     def test_hidden_plan_is_preserved_and_delete_does_not_touch_images(self):
         look = self.create()
         path = '/api/looks/' + look['lookId']
         asset_count = self.connection.execute('SELECT count(*) AS count FROM product_assets').fetchone()['count']
-        self.connection.execute('UPDATE plans SET active=false WHERE id=%s', (identifier('plan', 'RKH0002'),))
+        self.connection.execute('UPDATE plans SET active=false WHERE id=%s', (UUID('30000000-0000-4000-8000-000000000011'),))
         unavailable = self.client.get(path).json()
         self.assertFalse(unavailable['available'])
         self.assertIsNone(unavailable['currentPrice'])
@@ -135,5 +135,5 @@ class LooksIntegrationTests(unittest.TestCase):
             self.assertEqual([look['lookId'] for look in result.json()], selected)
         for invalid in [ids[:1], ids + ids[:1], [ids[0], ids[0]]]:
             self.assertEqual(self.client.post('/api/plans/compare', json={'lookIds': invalid}).status_code, 422)
-        self.connection.execute('UPDATE plans SET active=false WHERE id=%s', (identifier('plan', 'RKH0002'),))
+        self.connection.execute('UPDATE plans SET active=false WHERE id=%s', (UUID('30000000-0000-4000-8000-000000000011'),))
         self.assertEqual(self.client.post('/api/plans/compare', json={'lookIds': ids[:2]}).status_code, 409)

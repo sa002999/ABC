@@ -1,3 +1,5 @@
+[後端架構、開發與維護文件](./backend/README.md)。
+
 現行 React／FastAPI 啟動與商業規則：[整合說明](./INTEGRATION.md)。
 
 # KINU TABI 文件與圖表索引
@@ -6,6 +8,8 @@
 
 | 文件 | 用途 |
 |---|---|
+| [MCP 第一版定案](./MCP_SPEC.md) | 20 項產品決策、服務分工與里程碑 |
+| [MCP Server 開發](./mcp-server/README.md) | 獨立服務啟動、方案探索 UI、客戶端設定與驗證紀錄 |
 | [01 產品與體驗規劃](./01-product-experience.md) | 最新產品範圍、使用流程與商業規則 |
 | [02 功能與技術規格](./02-functional-technical-spec.md) | 驗收、API、資料、權限與保存規則 |
 | [03 開發與報告計畫](./03-development-report-plan.md) | 階段、Tickets 與驗收 |

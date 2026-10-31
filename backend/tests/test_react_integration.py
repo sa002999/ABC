@@ -2,10 +2,10 @@ import os
 import unittest
 from uuid import uuid4
 from fastapi.testclient import TestClient
-from app import app
-from auth import current_identity
-from database import connect,get_connection
-from seed_catalog import identifier
+from app.main import app
+from app.modules.accounts.dependencies import current_identity
+from app.core.database import connect, get_connection
+from commands.seeds.catalog import identifier
 
 
 @unittest.skipUnless(os.getenv('RUN_DATABASE_TESTS')=='1','Set RUN_DATABASE_TESTS=1 for RDS')
@@ -18,14 +18,14 @@ class ReactIntegrationTests(unittest.TestCase):
         self.client=TestClient(app);self.client.put('/api/account',json={}).raise_for_status()
         self.store=self.connection.execute("SELECT id FROM stores WHERE slug='demo-kyoto'").fetchone()['id']
         self.slot=self.connection.execute("SELECT id FROM availability_slots WHERE store_id=%s AND starts_at>now()+interval '60 days' ORDER BY starts_at LIMIT 1",(self.store,)).fetchone()['id']
-        self.plan='30000000-0000-4000-8000-000000000001';self.belt='20000000-0000-4000-8000-000000000001'
+        self.plan='30000000-0000-4000-8000-000000000013';self.belt='20000000-0000-4000-8000-000000000001'
 
     def tearDown(self):
         self.client.close();app.dependency_overrides.clear();self.tx.__exit__(None,None,None);self.connection.close()
 
     def people(self):
         return [{'id':'female','role':'FEMALE','kimonoId':str(identifier('kimono','RKH0002')),'beltId':self.belt},
-                {'id':'male','role':'MALE','kimonoId':str(identifier('kimono','RKH0103')),'beltId':None}]
+                {'id':'male','role':'MALE','kimonoId':str(identifier('kimono','RKM0001')),'beltId':None}]
 
     def body(self):
         people=self.people()+[{'id':'third','role':'FEMALE','kimonoId':str(identifier('kimono','RKH0057')),'beltId':None}]
@@ -33,13 +33,13 @@ class ReactIntegrationTests(unittest.TestCase):
             {'guestType':'ADULT_'+p['role'],'planId':self.plan,'kimonoId':p['kimonoId'],'accessoryIds':[p['beltId']] if p['beltId'] else []} for p in people],
             'contactName':'整合測試','contactEmail':'react@example.com','contactPhone':'+886912345678'}
 
-    def test_couple_third_belt_quote_atomic_hold_and_restore(self):
+    def test_group_three_belt_quote_atomic_hold_and_restore(self):
         saved=self.client.post('/api/booking-drafts',json=self.body());self.assertEqual(saved.status_code,201,saved.text);saved=saved.json()
         restored=self.client.get('/api/booking-drafts/'+saved['draftId']).json()
         self.assertEqual(restored['data']['contactName'],'整合測試')
         self.assertEqual(restored['data']['guests'][0]['accessoryIds'],[self.belt])
         quote=self.client.post('/api/pricing/quote',json={'draftId':saved['draftId'],'version':saved['version']})
-        self.assertEqual(quote.status_code,200,quote.text);quote=quote.json();self.assertEqual(quote['total'],4500)
+        self.assertEqual(quote.status_code,200,quote.text);quote=quote.json();self.assertEqual(quote['total'],4400)
         key=str(uuid4());payload={'draftId':saved['draftId'],'quoteToken':quote['quoteToken']}
         held=self.client.post('/api/availability/holds',json=payload,headers={'Idempotency-Key':key})
         self.assertEqual(held.status_code,201,held.text);held=held.json();self.assertEqual(held['partySize'],3)

@@ -13,13 +13,11 @@
 
 在三個 PowerShell 終端執行。第一次安裝前端套件使用 `npm ci`；後續啟動不需重裝。
 
-API：
+API（既有環境直接啟動；migration 與 seed 只在初始化或新增版本時明確執行）：
 
 ```powershell
 cd "D:\OneDrive\Jessica Documents\wehelp_stage3\P_Kinu-Tabi\backend"
-.\.venv\Scripts\python.exe manage.py migrate
-.\.venv\Scripts\python.exe manage.py seed-booking-demo
-.\.venv\Scripts\python.exe -m uvicorn app:app --reload --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 背景工作（AI 任務、生成圖清理、過期暫留清理）：
@@ -40,6 +38,8 @@ npm run dev
 開啟 <http://127.0.0.1:5173>。Vite 將 `/api` 代理至 `127.0.0.1:8000`，不要直接開啟 HTML。
 
 也可在前端執行 `npm run build`，由 FastAPI 在 <http://127.0.0.1:8000> 提供 `frontend/dist`；更新程式後須重新建置。SPA 子路由可直接開啟或重新整理；舊 `/#/plans` 網址會轉成 `/plans`。
+
+後端資料夾與維護方式見 [後端文件](backend/README.md)。
 
 ## 設定
 

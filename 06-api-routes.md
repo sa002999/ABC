@@ -35,10 +35,11 @@ DELETE /api/looks/{lookId}        取消一筆收藏
 | GET | `/api/stores` | 門市列表；`city` | `data[]`，名稱、地址、營業資訊 | 公開 | 既有 |
 | GET | `/api/stores/{storeId}` | 門市詳情 | 地址、交通、營業資訊、時區 | 公開 | 既有 |
 | GET | `/api/stores/{storeId}/availability` | 公開名額；`from, to, partySize`，可帶方案／服務條件 | 可選場次、全員可用狀態；不含其他會員資料 | 公開 | 既有 |
+| POST | `/api/catalog/party-availability` | `city, storeId, guests[{guestType,planId,kimonoId}], from, to`；1～3 位成人，最多31天日本日期 | 全員接待名額、不同實體和服於租借及整備期間的可用性、各人歸還時間、不可用原因、isDemo；不建立草稿或保留 | 公開 | MCP 全員查詢已實作；沿用預約規則 |
 | GET | `/api/kimonos` | 和服列表；門市、方案等篩選 | 商品、款式、目前價、展示圖 | 公開 | 補充 |
 | GET | `/api/kimonos/{kimonoId}` | 單一和服與展示圖切換資料 | 商品圖、預製穿搭圖、已知示意配件 ID | 公開 | 補充 |
 | GET | `/api/accessories` | 可售配件；和服／門市／類型條件 | 配件 ID、價格、圖片、適用條件 | 公開 | 補充 |
-| GET | `/api/models` | 商店 AI 人物來源照 | 可選模特兒 ID、預覽；與預製穿搭圖分開 | 公開 | 補充 |
+| GET | `/api/models` | 商店 AI 人物來源照 | 可選模特兒 ID、性別 role、預覽；女生與男生各 3 位 | 公開 | 補充 |
 | GET | `/api/photography-options` | 同地點、同和服的外拍比較及加值選項；`storeId, kimonoId, date` | 場景、內含服務、TWD 價格、季節日期、場次、輸出選項 | 公開 | 補充 |
 
 比較 API 的原規格只列 `planIds`；今天的比較含每份收藏的配件與圖片，需增加 `lookIds` 或等價搭配識別，並驗證收藏屬於會員。未登入的外拍比較可由 `photography-options` 回傳資料在前端並排，不要求先登入。
@@ -68,7 +69,9 @@ DELETE /api/looks/{lookId}        取消一筆收藏
 | 方法 | Route | 用途／主要 Request | 主要 Response | 權限 | 來源 |
 |---|---|---|---|---|---|
 | POST | `/api/try-on/sessions` | 建立試穿工作階段；人物來源、商品、照片同意版本（本人照時必要） | `sessionId, consentStatus` | 會員 | 既有 |
-| GET | `/api/try-on/sessions` | 列出仍有效的本人來源照片／工作階段，供跨裝置重用 | `data[]`，照片 ID、驗證狀態、授權預覽 | 會員 | 補充 |
+| GET | `/api/try-on/photos` | 會員人物照片庫，最多 3 張；不列生成圖 | `data[], maxPhotos`；照片 ID、短效預覽、狀態 | 會員 | 補充 |
+| DELETE | `/api/try-on/photos/{photoId}` | 刪除指定原圖；不刪生成圖／收藏 | `ok, deletionStatus` | 會員 | 補充 |
+| GET | `/api/try-on/sessions` | 內部工作階段資料；人物選擇改用會員照片庫，不在試穿頁提供歷史工作階段選單 | `data[]`，照片 ID、驗證狀態、授權預覽 | 會員 | 補充 |
 | POST | `/api/try-on/sessions/{sessionId}/upload-url` | 已同意的本人照上傳；`contentType, size, fileName` | 私有 S3 短效 `uploadUrl`、上傳方法、必要標頭及暫存照片 ID | 會員 | 既有 |
 | POST | `/api/try-on/sessions/{sessionId}/validate` | 上傳後驗真實物件與圖片品質；`photoId` | `photoId, status, issues[]` | 會員 | 既有 |
 | DELETE | `/api/try-on/sessions/{sessionId}/photo` | 刪除此階段的本人原圖 | `ok`，不刪已保存生成圖／收藏 | 會員 | 既有 |
@@ -148,14 +151,14 @@ Cloud Run 的 MCP **不是每個工具各設一個 REST route**。下列是現�
 | `list_kimonos` | 查和服商品 | 商品目錄；不提供後台欄位 |
 | `check_inventory` | 查商品及配件可用庫存 | 同門市／期間規則，不洩漏其他會員訂單 |
 | `check_availability` | 查接待與攝影名額 | 全員名額驗證，查詢不暫留 |
-| `upload_member_photo` | 同意後專用上傳，建立本人照片 ID | token／照片同意／擁有權驗證；傳輸格式依 MCP 客戶端整合確認 |
+| `get_photo_upload_consent`／`create_photo_upload`／`complete_photo_upload` | App-only 本機選檔、明確同意、短效 signed POST 直傳私人儲存、後端完成檢查 | 本人 MCP token 驗證；權限只回 UI metadata；最多三張，沿用網站照片庫與人物檢查；不生成、不扣額度，官網保留備援 |
 | `create_try_on` | 確認後建立穿搭或場景任務 | `kind=TRY_ON/SCENE`；每日 3 次、同時 1 個；不重複扣次 |
 | `get_try_on_result` | 查處理狀態與當日限時圖片 | 不回原圖，不重新生成，不入會員收藏 |
 | `create_booking_draft` | 建立本人草稿與回網站入口 | 1～3 人、不 hold、不付款、不成立正式預約 |
 
 MCP 透過服務端驗證的呼叫脈絡將會員身分交給 FastAPI 業務層；禁止以網站送入 `channel=mcp` 就取得不同限額或權限。可共用 domain service，不必為每個工具再造 `/api/mcp/...`。
 
-MCP 圖在生成當天結束的日本午夜刪除，網址不可超過刪圖時間。**網址的具體 TTL 及到期重發政策尚待確認**，不能在這份 route 表自行填死。付款、取消、退款、核銷回網站／授權後台處理。
+MCP 圖於完成當日日本午夜到期，API 停止提供網址，worker 清理物件。依 2026-10-25 確認，私人圖片網址最長 120 秒且不得超過圖片到期時間；網址到期不移除已載入圖片，需要重新載入時以唯讀任務查詢更新，不重新生成或扣額度。UI 於圖片本身到期隱藏結果；外部客戶端保存的副本不受本站控制。詳見 MCP_SPEC.md。付款、取消、退款、核銷回網站／授權後台處理。
 
 ## 8. 門市後台、庫存與退款
 
@@ -363,4 +366,17 @@ Idempotency-Key: <unique-payment-action-key>
 - token、查單、QR、退款與後台管理等補充路由仍是本表提案，原技術規格尚未逐條回寫。
 - API 路由不能只靠 HTTP 方法授權；MCP token 不得呼叫網站付款／取消／退款／核銷，網站 Firebase token 也不能自行指定生成通道。
 
-實作前把上述決策同步至 OpenAPI／Pydantic 與原技術規格；不要同時保留互相矛盾的 request 格式。確切圖像編輯模型、MCP 圖片網址 TTL／重發政策仍待既有流程的驗證／定案。
+實作前把上述決策同步至 OpenAPI／Pydantic 與原技術規格；不要同時保留互相矛盾的 request 格式。確切圖像編輯模型仍待既有流程的驗證／定案；MCP 圖片網址 TTL／重發政策已依 2026-10-25 確認同步至本表與 MCP_SPEC.md。
+
+
+## 2026-10-23 場景生成決策
+
+- /try-on 每位旅客在腰帶區下方提供「場景」下拉選單：不變更（預設）、櫻花、寺廟；男女皆適用。
+- 先確認並完成 Virtual Try-On，再另行確認場景生成；選擇場景不自動呼叫 API。場景未生成也可直接預約。
+- 以原始 TRY_ON 結果交由 Vertex AI `gemini-nano-banana-2.1`（global）變換背景；固定櫻花步道／日式寺廟庭院文字提示，要求保留人物、臉部、姿勢、和服與腰帶，僅調整背景、環境光與陰影，畫面提示 AI 仍可能改變細節。
+- 試穿與場景共用網站每日 5 次額度（日本午夜重設），每次新任務各計 1 次。與現有試穿一致，失敗不自動重送，重新確認重試另用 1 次額度。
+- 同會員、同原始試穿圖、同場景、同提示／模型版本已有有效結果時直接重用；同一請求及進行中任務不重複扣次。不提供強制重新生成選項。
+- 每次場景生成均引用原始 TRY_ON 結果；禁止使用 SCENE 結果作為另一場景的輸入。驗證擁有者、來源有效期限及人物同意，失效來源不扣額度。
+- 原圖與場景結果分開私有保存，各於完成後保存 7 天。場景失敗仍顯示原始試穿圖；切回不變更顯示原圖；刪除原始試穿圖不連帶刪除既有場景結果。
+- 收藏優先保存目前選取且已完成的場景結果 generationId；未完成時沿用原始試穿圖。場景不改變和服、腰帶明細或預約費用。
+- 公開 GET /api/scenes 提供場景選項；POST /api/try-on/jobs/:jobId/scene-generations 接收 sceneId（CHERRY_BLOSSOM／TEMPLE）、confirmed:true、Idempotency-Key，須會員登入。回應沿用 job，新增 sceneId、parentJobId。
