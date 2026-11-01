@@ -23,7 +23,7 @@ def current_identity(credentials: Annotated[HTTPAuthorizationCredentials | None,
         raise HTTPException(401, {"code": "INVALID_TOKEN", "message": "登入已失效，請重新登入。"}) from None
     except (exceptions.FirebaseError, GoogleAuthError, OSError):
         raise HTTPException(503, {"code": "AUTH_UNAVAILABLE", "message": "登入驗證暫時無法使用，請稍後再試。"}) from None
-    if not identity.get("uid") or not identity.get("email"):
+    if not identity.get("uid") or not identity.get("email") or identity.get('firebase', {}).get('sign_in_provider') == 'phone':
         raise HTTPException(401, {"code": "INVALID_TOKEN", "message": "無法取得會員身分。"})
     return identity
 

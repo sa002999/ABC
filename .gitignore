@@ -30,3 +30,6 @@ Thumbs.db
 wireframes/
 updated-mermaid-diagram-2026-10-16/
 frontend-legacy/
+
+# MCP plugins
+plugins/

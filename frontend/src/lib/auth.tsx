@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { initializeApp } from 'firebase/app'
-import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, type User } from 'firebase/auth'
+import { initializeApp, getApps } from 'firebase/app'
+import { getAuth, initializeAuth, inMemoryPersistence, EmailAuthProvider, reauthenticateWithCredential, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, type User } from 'firebase/auth'
 import { clearJourneys } from './bookingJourney'
 import { request } from './api'
 
@@ -10,6 +10,19 @@ const auth = authConfigured ? getAuth(initializeApp(config)) : null
 type AuthContextType = { user: User | null; ready: boolean; token: () => Promise<string>; login: (email: string, password: string) => Promise<void>; register: (email: string, password: string) => Promise<void>; logout: () => Promise<void>; verify: () => Promise<void>; reset: (email: string) => Promise<void>; refresh: () => Promise<void> }
 const Context = createContext<AuthContextType | null>(null)
 const requireAuth = () => { if (!auth) throw new Error('尚未設定 Firebase，登入服務未啟用。'); return auth }
+
+// This separate, memory-only session proves phone ownership; it never links a login provider to the member.
+export function phoneVerificationAuth(){
+ const existing=getApps().find(app=>app.name==='phone-verification')
+ return existing?getAuth(existing):initializeAuth(initializeApp(config,'phone-verification'),{persistence:inMemoryPersistence})
+}
+export async function reauthenticateMember(password:string, expectedUid:string){
+ const user=requireAuth().currentUser
+ if(!user?.email||user.uid!==expectedUid)throw new Error('帳號已變更，請重新登入。')
+ await reauthenticateWithCredential(user,EmailAuthProvider.credential(user.email,password))
+ if(requireAuth().currentUser?.uid!==expectedUid)throw new Error('帳號已變更，請重新登入。')
+ return user.getIdToken(true)
+}
 let synchronized: {uid: string; promise: Promise<unknown>} | null = null
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -24,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout: async () => { await signOut(requireAuth()); synchronized=null; clearJourneys(); for (const key of Object.keys(sessionStorage)) if (key.startsWith('kinu:')) sessionStorage.removeItem(key) },
     verify: async () => { const u = requireAuth().currentUser; if (!u || u.uid!==user?.uid) throw new Error('登入帳號已變更，請重新操作。'); await sendEmailVerification(u) },
     reset: async email => { await sendPasswordResetEmail(requireAuth(), email) },
-    refresh: async () => { const u = requireAuth().currentUser; if (u) { await u.reload(); await u.getIdToken(true); setUser(u); setRevision(v => v + 1) } },
+    refresh: async () => { const u = requireAuth().currentUser; if (u) { await u.reload(); const token=await u.getIdToken(true); await request('/api/account',{method:'PUT',token,body:{}}); setUser(u); setRevision(v => v + 1) } },
   }
   useEffect(() => {
     if (!user) return

@@ -1,8 +1,9 @@
+import type { MemberProfile } from '../lib/memberProfile'
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Button, ButtonLink, Check, Container, Field, Loading, Notice, PageHeading, Panel, Select, inputClass } from '../components/ui'
 import { useAuth } from '../lib/auth'
-import { actionKey, localized, request, unwrap } from '../lib/api'
+import { ApiError, actionKey, localized, request, unwrap } from '../lib/api'
 import { useBackend, useResource } from '../lib/hooks'
 import { selectionFromQuery, useBelts, useKimonos, usePlans } from '../lib/catalogApi'
 import { money, participantsFor, participantCounts, secondsLeft, updateParticipant, type Draft } from '../lib/domain'
@@ -27,6 +28,7 @@ export function Booking(){
   if(!auth.ready||!plans.data.length||!backend.connected)return
   let active=true;owner.current=auth.user?.uid??'guest';setInitialized(false);setBusy(false);setDraft(null);setQuote(null);setHold(null);setMessage('');setStep(0)
   async function initialize(){
+   let contact={name:'',email:auth.user?.email??'',phone:''}
    try{
     if(auth.user){
      const token=await auth.token();const id=params.get('draftId')
@@ -48,16 +50,18 @@ export function Booking(){
       if(carried)sessionStorage.removeItem('kinu:transfer:'+auth.user!.uid)
       setDraft(restored);setHold(rows[0].activeHold);setReceivedAt(Date.now());setMessage(carried&&!rows[0].activeHold?'已帶入搭配，請保存並重新取得報價。':'已恢復後端保存的本人草稿。')
      }return}
+     const profile=await request<MemberProfile>('/api/account',{token})
+     contact={name:profile.displayName??'',email:profile.email,phone:profile.phoneVerified?profile.phoneNumber??'':''}
      if(carried&&plans.data.some(p=>p.id===carried!.planId)){
       const chosen=plans.data.find(p=>p.id===carried!.planId)!
-      if(active){sessionStorage.removeItem('kinu:transfer:'+auth.user!.uid);setDraft({planId:chosen.id,city:chosen.city,storeId:'',date:'',slot:'',participants:carried.participants,photography:false,name:'',email:auth.user?.email??'',phone:'',acceptedPolicy:false})}
+      if(active){sessionStorage.removeItem('kinu:transfer:'+auth.user!.uid);setDraft({planId:chosen.id,city:chosen.city,storeId:'',date:'',slot:'',participants:carried.participants,photography:false,...contact,acceptedPolicy:false})}
       return
      }
     }
     const returning=readJourney(auth.user?.uid??'guest',params.get('bookingReturn'))
     if(returning){if(active){setDraft({...returning.draft,...(returning.selection?{planId:returning.selection.planId,participants:returning.selection.participants}:{}),acceptedPolicy:false});setStep(returning.step)}return}
     const chosen=plans.data.find(p=>p.id===params.get('plan'))??plans.data[0]
-    if(active)setDraft({planId:chosen.id,city:chosen.city,storeId:params.get('storeId')??'',date:'',slot:'',participants:selectionFromQuery(chosen,params),photography:false,name:'',email:auth.user?.email??'',phone:'',acceptedPolicy:false})
+    if(active)setDraft({planId:chosen.id,city:chosen.city,storeId:params.get('storeId')??'',date:'',slot:'',participants:selectionFromQuery(chosen,params),photography:false,...contact,acceptedPolicy:false})
    }catch(e){if(active)setMessage((e as Error).message)}finally{if(active)setInitialized(true)}
   }
   void initialize();return()=>{active=false}
@@ -78,7 +82,18 @@ export function Booking(){
   if(owner.current!==expectedOwner)throw new Error('帳號已變更，已停止套用草稿。')
   setDraft(d=>d?{...d,draftId:saved.draftId,version:saved.version}:d);return saved
  }
- async function perform(action:()=>Promise<void>){if(operation.current)return;const uid=owner.current;operation.current=true;setBusy(true);setMessage('');try{await action()}catch(e){if(owner.current===uid)setMessage((e as Error).message)}finally{operation.current=false;if(owner.current===uid)setBusy(false)}}
+ async function perform(action:()=>Promise<void>){
+  if(operation.current)return
+  const uid=owner.current;operation.current=true;setBusy(true);setMessage('')
+  try{await action()}catch(e){
+   if(owner.current===uid){
+    if(e instanceof ApiError&&e.code==='SLOT_UNAVAILABLE'){
+     change({slot:''});setStep(1);slots.reload()
+     setMessage('原時段已無法預約，已返回日期時段步驟。請重新選擇日期與時段；其他草稿資料已保留，選好後再保存並繼續。')
+    }else setMessage((e as Error).message)
+   }
+  }finally{operation.current=false;if(owner.current===uid)setBusy(false)}
+ }
  async function next(){if(!draft||!form.current?.reportValidity())return
   if(step===0&&!draft.storeId){setMessage('請選擇門市。');return}
   if(step===1&&(!draft.slot||!draft.date)){setMessage('請選擇有效日期與場次。');return}
