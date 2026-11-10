@@ -4,26 +4,9 @@ import { Button, Field, Loading, Notice, Panel, Select, inputClass } from './ui'
 import { request } from '../lib/api'
 import { phoneVerificationAuth, reauthenticateMember, useAuth } from '../lib/auth'
 import { usePrivateResource } from '../lib/hooks'
-import { normalizeMobile, type MemberProfile as Profile } from '../lib/memberProfile'
+import { normalizeMobile, phoneError, type MemberProfile as Profile } from '../lib/memberProfile'
 
-function phoneError(error:unknown){
- const code=(error as {code?:string}).code
- const messages:Record<string,string>={
-  'auth/invalid-verification-code':'驗證碼不正確，請重新輸入。',
-  'auth/code-expired':'驗證碼已到期，請重新發送。',
-  'auth/too-many-requests':'嘗試次數過多，請稍後再試。',
-  'auth/quota-exceeded':'簡訊服務目前額度不足，請稍後再試。',
-  'auth/invalid-credential':'密碼不正確或驗證已失效，請重新確認。',
-  'auth/wrong-password':'密碼不正確，請重新輸入。',
-  'auth/captcha-check-failed':'人機驗證未完成，請重試。',
-  'auth/unauthorized-domain':'目前網域未獲手機驗證授權，請從正式網站操作。',
-  'auth/operation-not-allowed':'此號碼所屬地區或手機驗證尚未啟用，請聯絡客服。',
-  'auth/invalid-app-credential':'無法完成人機驗證，請重新操作；本機請使用 Firebase 測試號碼。',
- }
- return code?.startsWith('auth/')?messages[code]??'手機驗證暫時無法完成，請稍後重試。':(error as Error).message
-}
-
-export function MemberProfile(){
+export function MemberProfile({onSaved}:{onSaved?:(profile:Profile)=>void}={}){
  const auth=useAuth();const profile=usePrivateResource<Profile|null>('/api/account',null)
  const[name,setName]=useState('');const[country,setCountry]=useState('+886');const[mobile,setMobile]=useState('');const[password,setPassword]=useState('');const[code,setCode]=useState('')
  const[busy,setBusy]=useState(false);const[message,setMessage]=useState('');const[sentTo,setSentTo]=useState('');const[cooldown,setCooldown]=useState(0)
@@ -43,7 +26,7 @@ export function MemberProfile(){
   const token=await auth.token()
   if(!alive.current)return
   const saved=await request<Profile>('/api/account',{method:'PATCH',token,body:{displayName:name.trim()}})
-  if(alive.current){profile.setData(saved);setMessage('會員姓名已保存。')}
+  if(alive.current){profile.setData(saved);onSaved?.(saved);setMessage('會員姓名已保存。')}
  })}
  async function sendCode(){if(cooldown>0)return;await perform(async()=>{
   const phone=normalizeMobile(country,mobile)
@@ -69,7 +52,7 @@ export function MemberProfile(){
    const phoneToken=await result.user.getIdToken(true)
    if(!alive.current)return
    const saved=await request<Profile>('/api/account/phone',{method:'POST',token,body:{phoneToken}})
-   if(alive.current){profile.setData(saved);resetPhone();setMobile('');setPassword('');setMessage('手機已完成驗證並綁定。')}
+   if(alive.current){profile.setData(saved);onSaved?.(saved);resetPhone();setMobile('');setPassword('');setMessage('手機已完成驗證並綁定。')}
   }finally{await signOut(phoneVerificationAuth())}
  })}
  if(profile.loading)return <Loading/>

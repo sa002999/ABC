@@ -33,3 +33,6 @@ frontend-legacy/
 
 # MCP plugins
 plugins/
+
+.vercel
+.env*

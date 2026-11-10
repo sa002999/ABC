@@ -1,4 +1,9 @@
 {
   "rewrites": [{ "source": "/((?!assets/).*)", "destination": "/index.html" }],
-  "headers": [{ "source": "/assets/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }] }]
+  "headers": [{ "source": "/assets/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }] }],
+  "git": {
+    "deploymentEnabled": {
+      "development": false
+    }
+  }
 }

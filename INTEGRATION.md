@@ -1,6 +1,6 @@
 # React／FastAPI 整合
 
-本文件是整合後的啟動與規則依據。`frontend/docs/step-*-progress.md` 是匯入前 React 專案的歷史紀錄，不代表本後端已完成付款。
+本文件是整合後的啟動與規則依據。`frontend/docs/step-*-progress.md` 是匯入前 React 專案的歷史紀錄。2026-11-07 官網已另行完成 Sandbox 付款與測試預約，現行狀態見 [付款文件](backend/docs/payments.md)。
 
 ## 目錄
 
@@ -59,7 +59,9 @@ npm run dev
 6. 暫留重送使用相同冪等識別碼，不能延長期限。暫留可釋放，尚不代表付款或正式預約成立。
 7. 聯絡資料保存在會員後端草稿，瀏覽器儲存空間不保存聯絡資料。跨頁暫存只使用頁面記憶體；重整後由伺服器恢復草稿與原暫留。
 8. 本人照片與模特兒來源可重用；照片處理同意與每次生成確認分開。原圖、生成圖、收藏分開管理；保留會員隔離、版本衝突與生成額度限制。
-9. 現階段 AI 只生成和服；不提供腰帶穿戴、場景生成、攝影加購、TapPay、正式預約、退款、票券、MCP、刪帳與後台營運操作。
+9. 官網支援 TapPay Sandbox 非 3D 信用卡、正式測試預約及會員查詢；正式收款、攝影加購、退款執行、票券、刪帳與後台營運操作尚未開放。AI／MCP 進度另見各模組現行文件。
+
+付款另執行 `backend/.venv/Scripts/python.exe backend/manage.py payment-reconcile`（或在 backend 執行 `.venv/Scripts/python.exe manage.py payment-reconcile`）；詳見付款文件的啟動與驗收說明。
 
 ## 示範價格
 

@@ -22,7 +22,8 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['status'], 'ok')
         self.assertTrue(response.json()['meta']['capabilities']['quote'])
-        self.assertFalse(response.json()['meta']['capabilities']['payment'])
+        from app.integrations.tappay_service import configured
+        self.assertEqual(response.json()['meta']['capabilities']['payment'],configured())
 
     def test_database_error_is_sanitized(self):
         def unavailable():

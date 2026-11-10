@@ -9,10 +9,17 @@ from commands.seeds.stores import seed_demo
 from commands.maintenance.database import check
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('command', choices=['check', 'check-react', 'configure-react-cors', 'migrate', 'seed-demo', 'seed-catalog', 'publish-catalog', 'seed-models', 'check-photo-storage', 'cleanup-photo-uploads', 'try-on-worker', 'cleanup-generations', 'seed-booking-demo', 'cleanup-booking-holds'])
+    parser.add_argument('command', choices=['check', 'check-react', 'configure-react-cors', 'migrate', 'seed-demo', 'seed-catalog', 'publish-catalog', 'seed-models', 'check-photo-storage', 'cleanup-photo-uploads', 'try-on-worker', 'cleanup-generations', 'seed-booking-demo', 'cleanup-booking-holds', 'payment-reconcile'])
     arguments = parser.parse_args()
     try:
-        if arguments.command == 'configure-react-cors':
+        if arguments.command == 'payment-reconcile':
+            import time
+            from app.modules.bookings.payments import reconcile_batch
+            while True:
+                try: reconcile_batch()
+                except psycopg.Error: print('Payment reconciliation unavailable; original orders preserved.',flush=True)
+                time.sleep(15)
+        elif arguments.command == 'configure-react-cors':
             from commands.maintenance.react import configure_react_cors
             configure_react_cors()
         elif arguments.command == 'check-react':

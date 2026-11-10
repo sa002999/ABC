@@ -31,7 +31,7 @@ describe('React 與 FastAPI 商業規則',()=>{
   expect(selectionFromQuery(plan,selectionQuery(plan,people))).toEqual(people)
  })
  it('後端草稿還原聯絡資料、逐人腰帶與版本，回傳不丟失草稿識別',()=>{
-  const saved:ServerDraft={draftId:'draft',version:3,activeHold:null,slot:{startsAt:'2026-11-01T00:00:00Z'},data:{storeId:'kyoto',slotId:'slot',guests:[{guestType:'ADULT_FEMALE',planId:plan.id,kimonoId:'female',accessoryIds:['belt']},{guestType:'ADULT_MALE',planId:plan.id,kimonoId:'male',accessoryIds:[]}],contactName:'測試',contactEmail:'test@example.com',contactPhone:'0912345678'}}
+  const saved:ServerDraft={draftId:'draft',version:3,activeHold:null,contactVerification:{email:false,phone:false,memberName:true},slot:{startsAt:'2026-11-01T00:00:00Z'},data:{storeId:'kyoto',slotId:'slot',guests:[{guestType:'ADULT_FEMALE',planId:plan.id,kimonoId:'female',accessoryIds:['belt']},{guestType:'ADULT_MALE',planId:plan.id,kimonoId:'male',accessoryIds:[]}],contactName:'測試',contactEmail:'test@example.com',contactPhone:'0912345678'}}
   const draft=fromServerDraft(saved,[plan]);const body=toServerDraft(draft)
   expect(draft).toMatchObject({draftId:'draft',version:3,date:'2026-11-01',name:'測試'})
   expect(body.guests.map(g=>g.accessoryIds)).toEqual([['belt'],[]])

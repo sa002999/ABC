@@ -28,6 +28,7 @@ class BookingInputTests(unittest.TestCase):
                 self.assertEqual(response.headers['cache-control'],'no-store')
 
 
+
 @unittest.skipUnless(os.getenv('RUN_DATABASE_TESTS')=='1','Set RUN_DATABASE_TESTS=1 for RDS')
 class BookingIntegrationTests(unittest.TestCase):
     def setUp(self):
@@ -36,6 +37,8 @@ class BookingIntegrationTests(unittest.TestCase):
         self.identity={'uid':'booking-test-'+str(uuid4()),'email':'booking-test@example.com','email_verified':True}
         app.dependency_overrides[current_identity]=lambda:self.identity
         self.client=TestClient(app);self.client.put('/api/account',json={}).raise_for_status()
+        self.phone='+8869'+str(uuid4().int % 100_000_000).zfill(8)
+        self.connection.execute("UPDATE users SET display_name='Booking Test',phone_number=%s,phone_verified_at=now() WHERE firebase_uid=%s",(self.phone,self.identity['uid']))
         self.store=self.connection.execute("SELECT id FROM stores WHERE slug='demo-kyoto'").fetchone()['id']
         self.slot=self.connection.execute("SELECT * FROM availability_slots WHERE store_id=%s AND starts_at>now()+interval '30 days' AND status='OPEN' ORDER BY starts_at LIMIT 1",(self.store,)).fetchone()
         self.assertIsNotNone(self.slot,'Run seed-booking-demo first')
@@ -46,7 +49,7 @@ class BookingIntegrationTests(unittest.TestCase):
     def body(self,count=1,slot=None):
         return {'storeId':str(self.store),'slotId':str(slot or self.slot['id']),
             'guests':[{'guestType':'ADULT_FEMALE','planId':'30000000-0000-4000-8000-000000000013' if count>1 else '30000000-0000-4000-8000-000000000011','kimonoId':str(identifier('kimono','RKH0002'))} for _ in range(count)],
-            'contactName':'測試聯絡人','contactEmail':'test@example.com','contactPhone':'+886912345678'}
+            'contactName':'測試聯絡人','contactEmail':self.identity['email'],'contactPhone':self.phone}
 
     def draft(self,body=None):
         response=self.client.post('/api/booking-drafts',json=body or self.body());self.assertIn(response.status_code,(200,201),response.text);return response.json()
@@ -154,6 +157,8 @@ class BookingIntegrationTests(unittest.TestCase):
             self.connection.execute('INSERT INTO availability_slots(id,store_id,starts_at,ends_at,capacity_total,is_demo) VALUES (%s,%s,%s,%s,3,true)',(slot_id,self.store,start+timedelta(hours=hours),start+timedelta(hours=hours,minutes=30)))
         first=self.draft();held=self.hold(first,self.quote(first).json());self.assertEqual(held.status_code,201,held.text)
         self.identity['uid']='other-cleaning-'+str(uuid4());self.client.put('/api/account',json={}).raise_for_status()
+        self.phone='+8869'+str(uuid4().int % 100_000_000).zfill(8)
+        self.connection.execute("UPDATE users SET display_name='Booking Test',phone_number=%s,phone_verified_at=now() WHERE firebase_uid=%s",(self.phone,self.identity['uid']))
         overlapping=self.draft(self.body(slot=ids[0]));self.assertEqual(self.quote(overlapping).status_code,409)
         updated=self.client.patch('/api/booking-drafts/'+overlapping['draftId'],json={**self.body(slot=ids[1]),'version':overlapping['version']})
         self.assertEqual(updated.status_code,200,updated.text);boundary=updated.json();q=self.quote(boundary);self.assertEqual(q.status_code,200,q.text)
@@ -187,8 +192,11 @@ class BookingConcurrencyTests(unittest.TestCase):
                 for key in identities:
                     headers={'x-test-member':key}
                     client.put('/api/account',json={},headers=headers).raise_for_status()
+                    phone='+8869'+str(uuid4().int % 100_000_000).zfill(8)
+                    with connect() as c:
+                        c.execute("UPDATE users SET display_name='Booking Test',phone_number=%s,phone_verified_at=now() WHERE firebase_uid=%s",(phone,identities[key]['uid']))
                     body={'storeId':str(store),'slotId':str(slot),'guests':[{'planId':str(plan),'kimonoId':str(kimono)}],
-                        'contactName':'測試','contactEmail':'race@example.com','contactPhone':'0912345678'}
+                        'contactName':'測試','contactEmail':identities[key]['email'],'contactPhone':phone}
                     draft=client.post('/api/booking-drafts',json=body,headers=headers);draft.raise_for_status()
                     quoted=client.post('/api/pricing/quote',json={'draftId':draft.json()['draftId'],'version':draft.json()['version']},headers=headers);quoted.raise_for_status()
                     requests.append((headers,{'draftId':draft.json()['draftId'],'quoteToken':quoted.json()['quoteToken']}))

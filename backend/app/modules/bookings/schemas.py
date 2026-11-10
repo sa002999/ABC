@@ -22,6 +22,26 @@ class Guest(CamelModel):
         return self
 
 
+class OtherContact(CamelModel):
+    model_config=ConfigDict(extra='forbid')
+    name: str=Field('',max_length=100)
+    email: str=Field('',max_length=254)
+    phone: str=Field('',max_length=30)
+
+
+class ContactVersion(CamelModel):
+    model_config=ConfigDict(extra='forbid')
+    version: int=Field(ge=1)
+
+
+class ContactEmailCode(ContactVersion):
+    code: str=Field(pattern=r'^[0-9]{6}$')
+
+
+class ContactPhoneProof(ContactVersion):
+    phone_token: str=Field(min_length=1,max_length=4096,repr=False)
+
+
 class DraftInput(CamelModel):
     model_config=ConfigDict(extra='forbid')
     store_id: UUID | None=None
@@ -31,6 +51,8 @@ class DraftInput(CamelModel):
     contact_name: str=Field('',max_length=100)
     contact_email: str=Field('',max_length=254)
     contact_phone: str=Field('',max_length=30)
+    contact_mode: Literal['member','other'] | None=None
+    other_contact: OtherContact | None=None
     locale: Literal['zh-Hant','en','ja']='zh-Hant'
     add_on_ids: list[UUID]=Field(default_factory=list,max_length=20)
     photography_id: UUID | None=None
@@ -58,3 +80,12 @@ class HoldInput(CamelModel):
     model_config=ConfigDict(extra='forbid')
     draft_id: UUID
     quote_token: UUID
+
+
+class PaymentInput(CamelModel):
+    model_config=ConfigDict(extra='forbid')
+    hold_id: UUID
+    quote_token: UUID
+    prime: str=Field(min_length=1,max_length=100,repr=False)
+    accepted_policy: bool
+    policy_version: str=Field(max_length=80)

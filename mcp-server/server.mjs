@@ -3,15 +3,17 @@ import { McpServer } from '@modelcontextprotocol/server';
 import { registerAppResource, registerAppTool, RESOURCE_MIME_TYPE } from '@modelcontextprotocol/ext-apps/server';
 import { createCatalog, filtersSchema, detailSchema, kimonoFiltersSchema, kimonoDetailSchema, outfitSchema, availabilitySchema, CatalogError } from './catalog.mjs';
 import { z } from 'zod';
+import { createBooking, prepareBooking, confirmBooking } from './booking.mjs';
 import { createTryOn, tryOnOutfit, prepareTryOn, confirmTryOn, getTryOnJob, getTryOnJobs, createPhotoUpload, completePhotoUpload, tryOnMediaOrigins } from './try-on.mjs';
 
-export const RESOURCE_URI = 'ui://kinu-tabi/plan-picker-v5.html';
+export const RESOURCE_URI = 'ui://kinu-tabi/plan-picker-v6.html';
 export const TRY_ON_URI = 'ui://kinu-tabi/try-on-v4.html';
 const annotations = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true };
 
 export function createServer(config) {
   const catalog = createCatalog(config);
   const tryOn = createTryOn(config);
+  const booking = createBooking(config);
   const server = new McpServer({ name: 'kinu-tabi', version: '0.1.0' }, {
     instructions: '先取得城市及1～3位成人總人數，再探索方案；圖片介面用 show_plan_picker。逐人選款用 list_kimonos/get_kimono_details；完整搭配用 check_outfit_summary，金額與共同門市以後端結果為準，修改後重查。全員可用時間用 check_party_availability，日期時段 UI 用 show_party_availability；先取得共同門市及日本日期，傳入完整原搭配。時段結果僅供查詢當下參考；修改搭配、門市或日期須重查，選時段不保留、不建立草稿。get_member_status 僅從 HTTP Bearer token 驗證本人；不得索取 token 貼入對話或工具參數。isDemo 必須揭露。試穿先 show_try_on 選人物，再 prepare_try_on 展示確認內容；只有本人明確確認該次人物、款式、額度與到期規則後才能 confirm_try_on。對話附圖及進度摘要不等於照片同意或生成授權。逾時用原 reviewId 重試或 get_try_on_jobs 恢復，禁止自動另建生成。傳遞 conversationId 可保留本次比較。試穿可略過，不占庫存、不代表預約或付款。',
   });
@@ -32,6 +34,7 @@ export function createServer(config) {
         : data.view === 'photoConsent' ? '請在試穿介面閱讀照片處理說明，選擇檔案並親自勾選同意。'
         : data.view === 'photoUpload' ? '已準備本次照片的短效上傳權限，尚未確認上傳或檢查完成；不生成或扣額度。'
         : data.view === 'photoUploaded' ? `照片檢查結果：${data.photo.status}。${data.photo.issues.map(i=>i.message).join('；')} 尚未生成或扣額度。`
+        : data.view?.startsWith('booking') ? '請依預約卡片內容繼續。'
         : '本人 MCP 會員連線有效。';
       const { _media, _upload, ...structuredContent } = data;
       return { content: [{ type: 'text', text: `${summary}\n${data.notice || ''}` }], structuredContent,
@@ -61,9 +64,19 @@ export function createServer(config) {
     _meta: { ui: { resourceUri: RESOURCE_URI } } }, handle(catalog.list));
   registerAppTool(server, 'show_party_availability', { title:'開啟全員日期與時段介面', description:'以完整全員搭配、共同門市及日本日期區間開啟可用時間 UI。與 check_party_availability 相同的唯讀查詢；不保留、不建立草稿。可保留搭配修改日期或共同門市。', inputSchema:availabilitySchema, annotations,
     _meta:{ui:{resourceUri:RESOURCE_URI}} }, handle(catalog.availability));
+  registerAppTool(server, 'prepare_booking', {
+    title: '建立會員草稿並取得報價', description: '只供預約卡片在本人選定搭配及時段後使用。既有不同草稿須經本人確認才取代。尚未保留庫存。',
+    inputSchema: prepareBooking, annotations: { ...annotations, readOnlyHint: false, idempotentHint: false },
+    _meta: { ui: { visibility: ['app'] } },
+  }, handle(booking.prepare));
+  registerAppTool(server, 'confirm_booking_hold', {
+    title: '確認暫留並前往官網付款', description: '只供本人確認卡片上的報價後使用。同一報價重試會恢復原暫留。付款在官網完成。',
+    inputSchema: confirmBooking, annotations: { ...annotations, readOnlyHint: false },
+    _meta: { ui: { visibility: ['app'] } },
+  }, handle(booking.hold));
   const ui = { prefersBorder: true, csp: { connectDomains: [], resourceDomains: config.imageOrigins } };
   // Keep existing cards readable while refreshed tool metadata advertises the current UI.
-  for (const uri of [RESOURCE_URI, 'ui://kinu-tabi/plan-picker-v4.html', 'ui://kinu-tabi/plan-picker-v3.html', 'ui://kinu-tabi/plan-picker-v2.html', 'ui://kinu-tabi/plan-picker.html']) {
+  for (const uri of [RESOURCE_URI, 'ui://kinu-tabi/plan-picker-v5.html', 'ui://kinu-tabi/plan-picker-v4.html', 'ui://kinu-tabi/plan-picker-v3.html', 'ui://kinu-tabi/plan-picker-v2.html', 'ui://kinu-tabi/plan-picker.html']) {
     registerAppResource(server, '和服方案選擇' + (uri === RESOURCE_URI ? '' : '（相容）'), uri, { mimeType: RESOURCE_MIME_TYPE, _meta: { ui } }, async () => ({
       contents: [{ uri, mimeType: RESOURCE_MIME_TYPE, text: await readFile(new URL('./dist/plan-picker.html', import.meta.url), 'utf8'), _meta: { ui } }],
     }));

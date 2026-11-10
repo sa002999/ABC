@@ -16,6 +16,8 @@ class ReactIntegrationTests(unittest.TestCase):
         self.identity={'uid':'react-test-'+str(uuid4()),'email':'react@example.com','email_verified':True}
         app.dependency_overrides[current_identity]=lambda:self.identity
         self.client=TestClient(app);self.client.put('/api/account',json={}).raise_for_status()
+        self.phone='+8869'+str(uuid4().int % 100_000_000).zfill(8)
+        self.connection.execute("UPDATE users SET display_name='Booking Test',phone_number=%s,phone_verified_at=now() WHERE firebase_uid=%s",(self.phone,self.identity['uid']))
         self.store=self.connection.execute("SELECT id FROM stores WHERE slug='demo-kyoto'").fetchone()['id']
         self.slot=self.connection.execute("SELECT id FROM availability_slots WHERE store_id=%s AND starts_at>now()+interval '60 days' ORDER BY starts_at LIMIT 1",(self.store,)).fetchone()['id']
         self.plan='30000000-0000-4000-8000-000000000013';self.belt='20000000-0000-4000-8000-000000000001'
@@ -31,7 +33,7 @@ class ReactIntegrationTests(unittest.TestCase):
         people=self.people()+[{'id':'third','role':'FEMALE','kimonoId':str(identifier('kimono','RKH0057')),'beltId':None}]
         return {'storeId':str(self.store),'slotId':str(self.slot),'guests':[
             {'guestType':'ADULT_'+p['role'],'planId':self.plan,'kimonoId':p['kimonoId'],'accessoryIds':[p['beltId']] if p['beltId'] else []} for p in people],
-            'contactName':'整合測試','contactEmail':'react@example.com','contactPhone':'+886912345678'}
+            'contactName':'整合測試','contactEmail':'react@example.com','contactPhone':self.phone}
 
     def test_group_three_belt_quote_atomic_hold_and_restore(self):
         saved=self.client.post('/api/booking-drafts',json=self.body());self.assertEqual(saved.status_code,201,saved.text);saved=saved.json()
@@ -47,7 +49,8 @@ class ReactIntegrationTests(unittest.TestCase):
         self.assertEqual(len({r['inventory_id'] for r in allocations}),3)
         again=self.client.post('/api/availability/holds',json=payload,headers={'Idempotency-Key':key}).json()
         self.assertEqual(held['expiresAt'],again['expiresAt'])
-        self.assertFalse(held['bookingConfirmed']);self.assertFalse(held['paymentAvailable'])
+        from app.integrations.tappay_service import configured
+        self.assertFalse(held['bookingConfirmed']);self.assertEqual(held['paymentAvailable'],configured())
         self.assertEqual(self.client.get('/api/booking-drafts/'+saved['draftId']).json()['activeHold']['holdId'],held['holdId'])
         self.client.delete('/api/availability/holds/'+held['holdId']).raise_for_status()
 

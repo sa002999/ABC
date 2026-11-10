@@ -94,6 +94,11 @@ class SceneIntegrationTests(unittest.TestCase):
                 {'id':'one','role':'FEMALE','kimonoId':self.selection['kimonoId'],'beltId':None,'generationId':scene}]})
             self.assertEqual(saved.status_code,201,saved.text)
             self.assertEqual(saved.json()['imageSource'],'GENERATION')
+        self.identity['email_verified']=True
+        self.client.put('/api/account',json={}).raise_for_status()
+        phone='+8869'+str(uuid4().int % 100_000_000).zfill(8)
+        self.connection.execute("UPDATE users SET display_name='Booking Test',phone_number=%s,phone_verified_at=now() WHERE id=%s",
+                                (phone,self.member))
         draft=self.client.post('/api/booking-drafts',json={'guests':[{'planId':self.selection['planId'],
             'kimonoId':self.selection['kimonoId'],'guestType':'ADULT_FEMALE','generationId':scene}]})
         self.assertEqual(draft.status_code,201,draft.text)

@@ -18,6 +18,9 @@ class ExperiencePlanTests(unittest.TestCase):
             try:
                 with TestClient(app) as client:
                     client.put('/api/account',json={}).raise_for_status()
+                    phone='+8869'+str(test_id.int % 100_000_000).zfill(8)
+                    connection.execute("UPDATE users SET display_name='Booking Test',phone_number=%s,phone_verified_at=now() WHERE firebase_uid=%s",
+                                       (phone,'plan-check-'+str(test_id)))
                     catalog=client.get('/api/plans?pageSize=50').json()
                     self.assertEqual(catalog['total'],3)
                     plans={p['kind']:p for p in catalog['data']}

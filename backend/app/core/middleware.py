@@ -11,7 +11,7 @@ async def request_id(request: Request, call_next):
         response.headers['Cache-Control'] = 'no-cache'
     if request.headers.get('authorization') or request.url.path.startswith(('/api/mcp', '/api/looks', '/api/account', '/api/plans/compare', '/api/try-on/photos', '/api/try-on/sessions', '/api/try-on/jobs', '/api/try-on/generations', '/api/booking-drafts', '/api/pricing', '/api/availability/holds')):
         response.headers['Cache-Control'] = 'no-store'
-    if request.url.path.endswith('/availability') or request.url.path == '/api/catalog/party-availability':
+    if request.url.path.startswith(('/api/bookings','/api/orders')) or request.url.path.endswith('/availability') or request.url.path == '/api/catalog/party-availability':
         response.headers['Cache-Control'] = 'no-store'
     response.headers["X-Request-ID"] = request.state.request_id
     return response

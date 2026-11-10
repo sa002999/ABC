@@ -37,9 +37,9 @@ const args = { city: 'KYOTO', partySize: 2 };
 
 test('declares catalogue, member and try-on tools with correct mutation annotations', async () => {
   const { tools } = await client.listTools();
-  assert.deepEqual(tools.map(t => t.name).sort(), ['check_outfit_summary','check_party_availability','complete_photo_upload','confirm_try_on','create_photo_upload','get_kimono_details','get_member_status','get_photo_upload_consent','get_plan_details','get_try_on_job','get_try_on_jobs','list_kimonos','list_plans','prepare_try_on','show_party_availability','show_plan_picker','show_try_on']);
-  assert.ok(tools.filter(t => !['prepare_try_on','confirm_try_on','create_photo_upload','complete_photo_upload'].includes(t.name)).every(t => t.annotations.readOnlyHint));
-  for(const name of ['get_photo_upload_consent','create_photo_upload','complete_photo_upload'])assert.deepEqual(tools.find(t=>t.name===name)._meta.ui.visibility,['app']);
+  assert.deepEqual(tools.map(t => t.name).sort(), ['check_outfit_summary','check_party_availability','complete_photo_upload','confirm_booking_hold','confirm_try_on','create_photo_upload','get_kimono_details','get_member_status','get_photo_upload_consent','get_plan_details','get_try_on_job','get_try_on_jobs','list_kimonos','list_plans','prepare_booking','prepare_try_on','show_party_availability','show_plan_picker','show_try_on']);
+  assert.ok(tools.filter(t => !['prepare_try_on','confirm_try_on','create_photo_upload','complete_photo_upload','prepare_booking','confirm_booking_hold'].includes(t.name)).every(t => t.annotations.readOnlyHint));
+  for(const name of ['get_photo_upload_consent','create_photo_upload','complete_photo_upload','prepare_booking','confirm_booking_hold'])assert.deepEqual(tools.find(t=>t.name===name)._meta.ui.visibility,['app']);
   assert.equal(tools.find(t => t.name==='confirm_try_on').annotations.readOnlyHint,false);
   assert.equal(tools.find(t => t.name === 'show_plan_picker')._meta.ui.resourceUri, RESOURCE_URI);
   assert.ok(!tools.find(t => t.name === 'list_plans')._meta?.ui?.resourceUri);

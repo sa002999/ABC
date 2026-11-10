@@ -1,3 +1,4 @@
+from app.modules.bookings.contact import contact_status, require_contact
 from app.core.database import connect
 from app.core.errors import error
 from app.modules.bookings.queries import active_hold, current_draft, expire_holds, lock_member, match_inventory, owned_draft, remaining_capacity, selected_slot, store_settings
@@ -24,9 +25,10 @@ def draft_json(body):
 
 
 def hold_data(row):
+    from app.integrations.tappay_service import configured
     return {'holdId':row['id'],'draftId':row['draft_id'],'status':effective_hold(row),'expiresAt':row['expires_at'],
         'serverTime':utcnow(),'currency':'TWD','total':row['total'],'partySize':row['party_size'],
-        'snapshot':row['snapshot'],'paymentAvailable':False,'bookingConfirmed':False}
+        'snapshot':row['snapshot'],'quoteToken':row['quote_id'],'paymentAvailable':configured(),'bookingConfirmed':row['status']=='RESERVED'}
 
 
 def draft_data(row,connection):
@@ -36,7 +38,7 @@ def draft_data(row,connection):
     return {'draftId':row['id'],'status':'DRAFT','version':row['version'],'expiresAt':row['expires_at'],
         'updatedAt':row['updated_at'],'data':row['data'],'validationIssues':issues,
         'slot':{'slotId':slot['id'],'startsAt':slot['starts_at'],'endsAt':slot['ends_at'],'isDemo':slot['is_demo']} if slot else None,
-        'activeHold':hold_data(held) if held else None}
+        'activeHold':hold_data(held) if held else None, 'contactVerification':contact_status(connection,row)}
 
 
 def validate_draft(connection,body,member,complete=False,lock_prices=False):
@@ -81,10 +83,6 @@ def validate_draft(connection,body,member,complete=False,lock_prices=False):
     validate_packages(body.guests,plans)
     if slot and settings:
         validate_rental_hours(slot, settings, plans)
-    if complete:
-        import re
-        if not body.contact_name.strip() or not re.fullmatch(r'[^@\s]+@[^@\s]+\.[^@\s]+',body.contact_email) or not re.fullmatch(r'[+0-9() .-]{6,30}',body.contact_phone):
-            error(422,'CONTACT_REQUIRED','請填寫聯絡姓名、有效 Email 與電話。')
     return settings,slot,plans
 
 
@@ -144,6 +142,7 @@ def quote(body, member, connection):
     row=owned_draft(connection,body.draft_id,member)
     if row['version']!=body.version: error(409,'DRAFT_CONFLICT','草稿已更新，請重新載入後報價。')
     data=draft_input(row)
+    require_contact(connection,row)
     settings,slot,plans=validate_draft(connection,data,member,True)
     if data.store_id is None or settings is None or slot is None:
         error(422,'INCOMPLETE_DRAFT','請先完成門市與場次選擇。')
@@ -160,8 +159,8 @@ def quote(body, member, connection):
 def cleanup_booking_holds():
     with connect() as connection:
         expire_holds(connection)
-        connection.execute("DELETE FROM inventory_allocations WHERE hold_id IN (SELECT id FROM availability_holds WHERE status IN ('EXPIRED','RELEASED') AND created_at<now()-interval '7 days')")
-        connection.execute("DELETE FROM availability_holds WHERE status IN ('EXPIRED','RELEASED') AND created_at<now()-interval '7 days'")
+        connection.execute("DELETE FROM inventory_allocations WHERE hold_id IN (SELECT h.id FROM availability_holds h WHERE status IN ('EXPIRED','RELEASED') AND created_at<now()-interval '7 days' AND NOT EXISTS (SELECT 1 FROM payment_orders o WHERE o.hold_id=h.id))")
+        connection.execute("DELETE FROM availability_holds h WHERE status IN ('EXPIRED','RELEASED') AND created_at<now()-interval '7 days' AND NOT EXISTS (SELECT 1 FROM payment_orders o WHERE o.hold_id=h.id)")
         connection.execute('DELETE FROM booking_quotes q WHERE expires_at<now() AND NOT EXISTS(SELECT 1 FROM availability_holds h WHERE h.quote_id=q.id)')
         connection.execute('''DELETE FROM booking_drafts d WHERE expires_at<now()
             AND NOT EXISTS(SELECT 1 FROM availability_holds h WHERE h.draft_id=d.id)
@@ -186,6 +185,7 @@ def create_hold(body, member, connection, response, idempotency_key, identity):
     quoted=connection.execute('SELECT * FROM booking_quotes WHERE id=%s AND user_id=%s AND draft_id=%s FOR SHARE',(body.quote_token,member,row['id'])).fetchone()
     if not quoted or quoted['expires_at']<=utcnow() or quoted['draft_version']!=row['version']:
         error(409,'QUOTE_EXPIRED','報價已到期或草稿已變更，請重新報價。')
+    require_contact(connection,row)
     settings,slot,plans=validate_draft(connection,data,member,True,True)
     snapshot,pricing_hash=price_snapshot(data,settings,slot,plans)
     if pricing_hash!=quoted['pricing_hash']: error(409,'PRICE_CHANGED','價格或租借規則已變更，請重新查看報價再確認。')
@@ -204,7 +204,8 @@ def create_hold(body, member, connection, response, idempotency_key, identity):
 def get_hold(hold_id, member, connection):
     row=connection.execute('SELECT * FROM availability_holds WHERE id=%s AND user_id=%s',(hold_id,member)).fetchone()
     if not row: error(404,'HOLD_NOT_FOUND','找不到這筆暫留。')
-    return hold_data(row)
+    order=connection.execute('SELECT order_no FROM payment_orders WHERE hold_id=%s',(hold_id,)).fetchone()
+    return {**hold_data(row),'orderNo':order['order_no'] if order else None}
 
 
 def release_hold(hold_id, member, connection):

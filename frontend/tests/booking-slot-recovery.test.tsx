@@ -5,7 +5,7 @@ import { freshBooking } from '../src/lib/bookingJourney'
 import { ApiError, request } from '../src/lib/api'
 import { Booking } from '../src/pages/Booking'
 
-const state = vi.hoisted(() => ({ values: [] as unknown[], index: 0, reload: vi.fn() }))
+const state = vi.hoisted(() => ({ values: [] as unknown[], index: 0, emailVerified: true, reload: vi.fn() }))
 vi.mock('react', async original => ({
  ...await original<typeof import('react')>(),
  useEffect: () => {},
@@ -19,7 +19,7 @@ vi.mock('react', async original => ({
  },
 }))
 vi.mock('react-router-dom', () => ({ useSearchParams: () => [new URLSearchParams()] }))
-vi.mock('../src/lib/auth', () => ({ useAuth: () => ({ ready: true, user: { uid: 'member' }, token: async () => 'token' }) }))
+vi.mock('../src/lib/auth', () => ({ useAuth: () => ({ ready: true, user: { uid: 'member', emailVerified: state.emailVerified }, token: async () => 'token' }) }))
 vi.mock('../src/lib/hooks', () => ({
  useBackend: () => ({ connected: true }),
  useResource: () => ({ data: [], reload: state.reload }),
@@ -30,6 +30,11 @@ vi.mock('../src/lib/catalogApi', async () => {
 })
 vi.mock('../src/pages/Plans', () => ({ BeltSelection: () => null, GarmentSelection: () => null }))
 vi.mock('../src/lib/api', async original => ({ ...await original<typeof import('../src/lib/api')>(), request: vi.fn() }))
+
+function renderBookingFlow(node: ReactNode) {
+ if (isValidElement(node) && typeof node.type === 'function' && node.type.name === 'BookingFlow') return (node.type as () => ReactNode)()
+ return node
+}
 
 function findForm(node: ReactNode): { onSubmit: (event: { preventDefault: () => void }) => void } | undefined {
  if (Array.isArray(node)) return node.map(findForm).find(Boolean)
@@ -43,7 +48,7 @@ it('舊草稿時段失效時由門市步驟回到時段重選，保留其他資�
  state.values = [draft, 0, false, '', null, null, 0, Date.now(), true]
  state.index = 0
  vi.mocked(request).mockRejectedValueOnce(new ApiError('時段已關閉', 409, 'SLOT_UNAVAILABLE'))
- findForm(Booking())!.onSubmit({ preventDefault() {} })
+ findForm(renderBookingFlow(Booking()))!.onSubmit({ preventDefault() {} })
  await vi.waitFor(() => expect(state.values[2]).toBe(false))
  expect(state.values[1]).toBe(1)
  expect(state.values[0]).toEqual({ ...draft, slot: '', acceptedPolicy: false })
@@ -52,10 +57,33 @@ it('舊草稿時段失效時由門市步驟回到時段重選，保留其他資�
 
  state.values[0] = { ...draft, date: '2026-11-10', slot: 'new-slot' }
  state.index = 0
- vi.mocked(request).mockResolvedValueOnce({ draftId: 'draft', version: 4 })
- findForm(Booking())!.onSubmit({ preventDefault() {} })
+ vi.mocked(request).mockResolvedValueOnce({ draftId: 'draft', version: 4, data: {contactEmail:draft.email,contactPhone:draft.phone}, contactVerification:{email:false,phone:false,memberName:true} })
+ findForm(renderBookingFlow(Booking()))!.onSubmit({ preventDefault() {} })
  await vi.waitFor(() => expect(state.values[1]).toBe(2))
  expect(request).toHaveBeenLastCalledWith('/api/booking-drafts/draft', expect.objectContaining({
   method: 'PATCH', body: expect.objectContaining({ slotId: 'new-slot', version: 3 }),
  }))
+})
+
+it('登入 Email 未驗證時，預約入口提供會員中心連結且不載入草稿', () => {
+ state.emailVerified = false
+ try {
+  const screen = Booking()
+  expect(JSON.stringify(screen)).toContain('/account?returnTo=')
+  expect(findForm(screen)).toBeUndefined()
+ } finally {
+  state.emailVerified = true
+ }
+})
+
+it.each([
+ [{displayName:' ',phoneVerified:true}, '填寫會員姓名'],
+ [{displayName:'旅客',phoneVerified:false}, '完成會員手機驗證'],
+])('會員資料未完成時，預約入口指引回會員中心', (profile, message) => {
+ state.values = [null, 0, false, '', null, null, 0, Date.now(), true, {phoneNumber:'+886912345678',...profile}]
+ state.index = 0
+ const screen = renderBookingFlow(Booking())
+ expect(JSON.stringify(screen)).toContain(message)
+ expect(JSON.stringify(screen)).toContain('/account?returnTo=')
+ expect(findForm(screen)).toBeUndefined()
 })

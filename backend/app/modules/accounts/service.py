@@ -35,20 +35,16 @@ def update_profile(body, identity, connection):
     return public_account(row)
 
 
-def bind_phone(body, identity, connection):
+def verified_phone(phone_token, identity):
     import re
     import time
-    import psycopg
     from app.integrations.firebase import firebase_app
     from firebase_admin import auth, exceptions
     from google.auth.exceptions import GoogleAuthError
 
-    account = get_account(identity, connection)
     now = time.time()
-    if identity.get('firebase', {}).get('sign_in_provider') != 'password' or not 0 <= now-identity.get('auth_time', 0) <= 300:
-        raise HTTPException(401, {'code': 'REAUTH_REQUIRED', 'message': '請先以 Email 與密碼重新驗證身分，再綁定手機。'})
     try:
-        proof = auth.verify_id_token(body.phone_token, app=firebase_app(), check_revoked=True)
+        proof = auth.verify_id_token(phone_token, app=firebase_app(), check_revoked=True)
     except auth.CertificateFetchError:
         raise HTTPException(503, {'code': 'AUTH_UNAVAILABLE', 'message': '手機驗證服務暫時無法使用，請稍後重試。'}) from None
     except (auth.InvalidIdTokenError, auth.RevokedIdTokenError, auth.UserDisabledError, auth.UserNotFoundError, ValueError):
@@ -61,6 +57,17 @@ def bind_phone(body, identity, connection):
             or not 0 <= now-proof.get('auth_time', 0) <= 300
             or not re.fullmatch(r'(?:\+8869\d{8}|\+81[789]0\d{8})', phone)):
         raise HTTPException(422, {'code': 'INVALID_PHONE_PROOF', 'message': '請使用台灣或日本手機重新完成簡訊驗證。'})
+    return phone, proof
+
+
+def bind_phone(body, identity, connection):
+    import time
+    import psycopg
+
+    account = get_account(identity, connection)
+    if identity.get('firebase', {}).get('sign_in_provider') != 'password' or not 0 <= time.time()-identity.get('auth_time', 0) <= 300:
+        raise HTTPException(401, {'code': 'REAUTH_REQUIRED', 'message': '請先以 Email 與密碼重新驗證身分，再綁定手機。'})
+    phone, proof = verified_phone(body.phone_token, identity)
     try:
         with connection.transaction():
             connection.execute('SELECT id FROM users WHERE id=%s FOR UPDATE', (account['id'],))

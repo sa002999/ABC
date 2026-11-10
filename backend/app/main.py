@@ -9,6 +9,7 @@ from app.core.database import close_pool, get_connection
 from app.modules.accounts.router import router as accounts_router
 from app.modules.accounts.mcp import router as mcp_router
 from app.modules.bookings.router import router as bookings_router
+from app.modules.bookings.mcp import router as mcp_booking_router
 from app.modules.catalog.router import router as catalog_router
 from app.modules.catalog.outfits import router as outfits_router
 from app.modules.looks.router import router as looks_router
@@ -28,10 +29,11 @@ async def lifespan(_app: FastAPI):
 
 
 def health():
+    from app.integrations.tappay_service import configured
     return {"status": "ok", "meta": {"capabilities": {
         "catalogRead": True, "bookingDraft": True, "quote": True, "inventoryHold": True,
         "aiGeneration": True, "account": True, "looks": True,
-        "booking": False, "payment": False, "orderRead": False, "voucher": False,
+        "booking": True, "payment": configured(), "orderRead": True, "voucher": False,
         "cancellation": False, "mcp": True}}}
 
 
@@ -54,5 +56,6 @@ app.include_router(looks_router)
 app.include_router(try_on_router)
 app.include_router(mcp_try_on_router)
 app.include_router(bookings_router)
+app.include_router(mcp_booking_router)
 
 mount_frontend(app)
