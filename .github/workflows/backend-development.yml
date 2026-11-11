@@ -23,8 +23,20 @@ jobs:
         working-directory: backend
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Build frontend for backend route tests
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
+      - name: Install MediaPipe system dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1
       - run: python -m pip install -r requirements.txt
       - run: python -m unittest discover -s tests -v

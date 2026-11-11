@@ -27,6 +27,13 @@ def jpeg():
     output=BytesIO();Image.new('RGB',(800,1200),'white').save(output,'JPEG');return output.getvalue()
 
 
+TRY_ON_TEST_ENV = {
+    'GOOGLE_CLOUD_PROJECT': 'test-project',
+    'VERTEX_TRY_ON_LOCATION': 'us-central1',
+    'VERTEX_TRY_ON_MODEL': 'virtual-try-on-001',
+}
+
+
 class GenerationUnitTests(unittest.TestCase):
     def test_tokyo_midnight_and_authentication(self):
         before=datetime(2026,10,17,14,59,tzinfo=timezone.utc)
@@ -41,6 +48,7 @@ class GenerationUnitTests(unittest.TestCase):
                 self.assertEqual(response.status_code,401)
                 self.assertEqual(response.headers['cache-control'],'no-store')
 
+    @patch.dict(os.environ, TRY_ON_TEST_ENV)
     def test_provider_errors_are_sanitized_and_not_retried(self):
         with patch('app.integrations.vertex.genai.Client') as factory:
             client=factory.return_value.__enter__.return_value
@@ -51,6 +59,7 @@ class GenerationUnitTests(unittest.TestCase):
             self.assertEqual(factory.call_args.kwargs['http_options'].retry_options.attempts,1)
         with self.assertRaises(GenerationError): clean_result(b'not an image')
 
+    @patch.dict(os.environ, TRY_ON_TEST_ENV)
     def test_sdk_uses_reference_person_product_and_one_image(self):
         from google.genai import types
         content=jpeg()

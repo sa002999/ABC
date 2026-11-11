@@ -20,6 +20,11 @@ class SceneProviderTests(unittest.TestCase):
             self.assertEqual(response.status_code,401)
             self.assertEqual(response.headers['cache-control'],'no-store')
 
+    @patch.dict(os.environ, {
+        'GOOGLE_CLOUD_PROJECT': 'test-project',
+        'VERTEX_SCENE_LOCATION': 'global',
+        'VERTEX_SCENE_MODEL': 'gemini-nano-banana-2.1',
+    })
     def test_one_image_edit_with_no_sampling_parameters_or_retry(self):
         with patch('app.integrations.vertex.genai.Client') as factory:
             client=factory.return_value.__enter__.return_value
