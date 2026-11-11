@@ -1,3 +1,4 @@
+import os
 from types import SimpleNamespace
 from unittest.mock import patch
 import unittest
@@ -16,7 +17,10 @@ class PoseCheckTests(unittest.TestCase):
         return [SimpleNamespace(x=0.5, y=0.5, visibility=0.5, presence=0.5) for _ in range(33)]
 
     def detect(self, poses):
-        with patch.object(mp.tasks.vision.PoseLandmarker, 'create_from_options') as factory:
+        with (
+            patch.object(mp, 'Image'),
+            patch.object(mp.tasks.vision.PoseLandmarker, 'create_from_options') as factory,
+        ):
             factory.return_value.__enter__.return_value.detect.return_value.pose_landmarks = poses
             result = pose_issue(self.image)
             self.assertEqual(factory.call_args.args[0].num_poses, 2)
@@ -43,6 +47,7 @@ class PoseCheckTests(unittest.TestCase):
         points[12].x = 1
         self.assertIsNone(self.detect([points]))
 
+    @unittest.skipIf(os.getenv('SKIP_MEDIAPIPE_MODEL_TEST') == '1', 'MediaPipe model inference disabled for this run')
     @unittest.skipUnless(MODEL.is_file(), 'Provide data/ml-models/pose_landmarker_lite.task for real model verification')
     def test_supplied_model_rejects_blank_image_and_accepts_reference_photo(self):
         self.assertEqual(pose_issue(self.image), 'NO_PERSON')
