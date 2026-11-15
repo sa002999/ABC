@@ -24,9 +24,9 @@
 
 使用 `google-genai==2.31.0`，依既有 `try_on.py` 的 `genai.Client` → `models.recontext_image`、`RecontextImageSource`、`ProductImage` 與 `RecontextImageConfig(number_of_images=1)` 流程呼叫。人物與服裝從私人儲存取得後以 `types.Image(image_bytes=..., mime_type='image/jpeg')` 傳入相同結構，不額外落地會員原圖。SDK 明確設定 Vertex、專案與地區，逾時 180 秒、總嘗試數 1，避免自動重送付費預測。
 
-`.env` 的 `GOOGLE_CLOUD_PROJECT`、`GOOGLE_CLOUD_LOCATION` 指定 Vertex 專案與地區。本機使用既有 `gcloud` ADC；Firebase 的 JSON 路徑已改為專用 `FIREBASE_SERVICE_ACCOUNT_PATH`，由 Firebase Admin 明確載入，不再佔用 Google 的全域 ADC 變數。
+`.env` 的 `GOOGLE_CLOUD_PROJECT`、`GOOGLE_CLOUD_LOCATION` 指定 Vertex 專案與地區。本機使用既有 `gcloud` ADC。Firebase Admin 透過[專用環境變數](../deployment.md)載入服務帳戶憑證。
 
-EC2 可設定 `GOOGLE_APPLICATION_CREDENTIALS` 指向具 Vertex 權限的服務帳戶 JSON 或使用適用的工作負載身分。這與 Firebase 的服務帳戶分開；私鑰不可提交版本庫。若本機尚未建立 ADC，先完成 `gcloud auth application-default login`。
+EC2 的 Worker 透過 `GOOGLE_APPLICATION_CREDENTIALS` 載入 Vertex WIF 設定檔。若本機尚未建立 ADC，先執行 `gcloud auth application-default login`。參見[部署設定](../deployment.md)。
 
 可選參數：`VERTEX_TRY_ON_MODEL`（預設 `virtual-try-on-001`）、`VERTEX_TRY_ON_LOCATION`（未設定時沿用 Google Cloud 地區）。不讀取前端提供的供應商網址或模型名稱。
 

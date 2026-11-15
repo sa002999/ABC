@@ -17,7 +17,7 @@
 ## 設定與資料
 
 - `frontend/js/firebase-config.js` 僅放公開的 Firebase Web 設定。
-- 後端 `.env` 放 `FIREBASE_PROJECT_ID` 與 `FIREBASE_SERVICE_ACCOUNT_PATH`（Firebase 私鑰 JSON 的絕對路徑）。JSON 必須保存在 frontend 以外，不能提交版本庫或公開部署。此專用變數避免 Firebase 憑證覆蓋 Vertex AI 使用的本機 gcloud ADC；舊環境未設定時仍沿用 Firebase Admin 的預設憑證機制。
+- 後端以 `FIREBASE_PROJECT_ID` 選擇 Firebase 專案，透過 ADC 取得憑證。參見[部署設定](../deployment.md)。
 - Firebase SDK 管理登入狀態與憑證更新；本站不保存密碼，不自製 JWT。
 - `PUT /api/account` 搭配 `Authorization: Bearer <Firebase ID token>` 與空 JSON `{}`，冪等同步會員；`GET /api/account` 取得本人資料。Email 未驗證仍可登入，同步狀態如實顯示。
 - FastAPI 檢查簽章、專案、期限、撤銷與 Firebase 停用狀態。缺少或無效憑證回 401、驗證服務不可用回 503、本站停用會員回 403。
