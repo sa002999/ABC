@@ -1,11 +1,6 @@
-name: Backend Development CI
+name: Backend Development CI/CD
 
 on:
-  pull_request:
-    branches: [development]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend-development.yml"
   push:
     branches: [development]
     paths:
@@ -38,3 +33,71 @@ jobs:
       - run: python -m unittest discover -s tests -v
         env:
           SKIP_MEDIAPIPE_MODEL_TEST: "1"
+
+  deploy:
+    name: Deploy backend to EC2 via SSM
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/development'
+    environment: backend-development
+    permissions:
+      id-token: write
+    concurrency:
+      group: backend-development-ec2
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Assume AWS deployment role
+        if: vars.EC2_DEPLOY_ENABLED == 'true'
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-session-name: kinu-backend-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Deploy tested commit and verify HTTPS
+        if: vars.EC2_DEPLOY_ENABLED == 'true'
+        env:
+          EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+          API_BASE_URL: ${{ vars.EC2_API_BASE_URL }}
+        run: |
+          set -euo pipefail
+          [[ "$EC2_INSTANCE_ID" =~ ^i-([0-9a-f]{8}|[0-9a-f]{17})$ && "$API_BASE_URL" == https://* ]]
+
+          command_id=$(aws ssm send-command \
+            --document-name KinuTabi-DeployBackendDevelopment \
+            --instance-ids "$EC2_INSTANCE_ID" \
+            --parameters "CommitSha=$GITHUB_SHA" \
+            --timeout-seconds 60 --query 'Command.CommandId' --output text)
+          echo "SSM command ID: $command_id"
+
+          # Allow for SSM eventual consistency and a full deployment.
+          deadline=$((SECONDS + 1320))
+          while (( SECONDS < deadline )); do
+            if invocation=$(aws ssm get-command-invocation \
+                --command-id "$command_id" --instance-id "$EC2_INSTANCE_ID" \
+                --output json 2>&1); then
+              status=$(jq -r '.Status' <<< "$invocation")
+              case "$status" in
+                Success)
+                  if [[ $(jq -r '.StandardOutputContent' <<< "$invocation") == KINU_DEPLOY_SUPERSEDED ]]; then
+                    echo "Skipping deployment because development has advanced."
+                    exit 0
+                  fi
+                  curl --fail --silent --show-error --retry 8 --retry-all-errors --retry-delay 3 \
+                    --connect-timeout 5 --max-time 10 "${API_BASE_URL%/}/api/health/db"
+                  exit 0
+                  ;;
+                Pending|InProgress|Delayed|Cancelling) ;;
+                *)
+                  echo "SSM deployment failed: $status. Inspect command $command_id in AWS." >&2
+                  exit 1
+                  ;;
+              esac
+            elif [[ "$invocation" != *"(InvocationDoesNotExist)"* ]]; then
+              printf '%s\n' "$invocation" >&2
+              exit 1
+            fi
+            sleep 5
+          done
+          echo "Timed out waiting for SSM command $command_id." >&2
+          exit 1

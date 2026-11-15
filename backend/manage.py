@@ -1,5 +1,6 @@
 """Explicit maintenance commands; HTTP startup never writes schema or seeds."""
 import argparse
+import signal
 import sys
 import httpx
 import psycopg
@@ -7,6 +8,23 @@ from botocore.exceptions import BotoCoreError, ClientError
 from commands.migrate import migrate
 from commands.seeds.stores import seed_demo
 from commands.maintenance.database import check
+
+
+def run_try_on_worker():
+    from app.modules.try_on.worker import worker
+
+    stopping = False
+
+    def request_stop(_signum, _frame):
+        nonlocal stopping
+        stopping = True
+
+    signal.signal(signal.SIGTERM, request_stop)
+    signal.signal(signal.SIGINT, request_stop)
+    worker(stop_requested=lambda: stopping)
+    print('Try-on worker stopped.')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('command', choices=['check', 'check-react', 'configure-react-cors', 'migrate', 'seed-demo', 'seed-catalog', 'publish-catalog', 'seed-models', 'check-photo-storage', 'cleanup-photo-uploads', 'try-on-worker', 'cleanup-generations', 'seed-booking-demo', 'cleanup-booking-holds', 'payment-reconcile'])
@@ -33,11 +51,7 @@ if __name__ == '__main__':
             cleanup_booking_holds()
             print('Expired booking holds released; pending payments preserved.')
         elif arguments.command == 'try-on-worker':
-            from app.modules.try_on.worker import worker
-            try:
-                worker()
-            except KeyboardInterrupt:
-                print('Try-on worker stopped.')
+            run_try_on_worker()
         elif arguments.command == 'cleanup-generations':
             from app.modules.try_on.worker import cleanup_results
             cleanup_results()

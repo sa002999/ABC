@@ -1,0 +1,51 @@
+schemaVersion: '2.2'
+description: Deploy the tested KINU TABI development commit on EC2
+parameters:
+  CommitSha:
+    type: String
+    allowedPattern: '^[0-9a-f]{40}$'
+    interpolationType: ENV_VAR
+mainSteps:
+  - action: aws:runShellScript
+    name: deployBackend
+    inputs:
+      timeoutSeconds: '1200'
+      runCommand:
+        - |
+          set -eu
+          : "${SSM_CommitSha:?Update SSM Agent to support ENV_VAR interpolation}"
+          cd /
+          # Replace these four values before registering the document.
+          runuser -u 'REPLACE_DEPLOY_USER' -- /bin/bash -s -- "$SSM_CommitSha" <<'DEPLOY'
+          set -euo pipefail
+          repo_dir='/REPLACE_CHECKOUT_PATH'
+          api_service='REPLACE_API.service'
+          worker_service='REPLACE_WORKER.service'
+          commit_sha=$1
+          [[ "$commit_sha" =~ ^[0-9a-f]{40}$ ]]
+          export GIT_TERMINAL_PROMPT=0
+
+          cd "$repo_dir"
+          lock_file=$(git rev-parse --git-path kinu-backend-deploy.lock)
+          exec 9>"$lock_file"
+          flock -n 9
+          git fetch origin refs/heads/development
+          latest_commit=$(git rev-parse FETCH_HEAD)
+          if [[ "$latest_commit" != "$commit_sha" ]]; then
+            echo KINU_DEPLOY_SUPERSEDED
+            exit 0
+          fi
+          checkout_status=$(git status --porcelain --untracked-files=no)
+          if [[ -n "$checkout_status" ]]; then
+            echo "EC2 checkout has uncommitted tracked changes." >&2
+            exit 1
+          fi
+
+          git switch --detach --no-overwrite-ignore "$commit_sha"
+          cd backend
+          .venv/bin/python -m pip install -r requirements.txt
+          .venv/bin/python manage.py migrate
+          sudo -n systemctl restart "$api_service" "$worker_service"
+          systemctl is-active --quiet "$api_service"
+          systemctl is-active --quiet "$worker_service"
+          DEPLOY

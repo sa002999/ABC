@@ -91,13 +91,15 @@ def cleanup_results():
                 connection.execute('UPDATE generation_jobs SET cleanup_pending=false WHERE id=%s',(row['id'],))
 
 
-def worker(once=False):
+def worker(once=False, stop_requested=lambda: False):
     print('Try-on worker started. Paid requests run only for explicitly confirmed queued jobs.',flush=True)
-    while True:
+    while not stop_requested():
         try:
             from app.modules.bookings.service import cleanup_booking_holds
             cleanup_booking_holds()
             cleanup_results()
+            if stop_requested():
+                return
             with connect() as connection:
                 job=connection.execute("SELECT * FROM generation_jobs WHERE status='QUEUED' ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED").fetchone()
                 if job: connection.execute("UPDATE generation_jobs SET status='VALIDATING',started_at=now() WHERE id=%s",(job['id'],))
@@ -106,5 +108,6 @@ def worker(once=False):
                 print('Try-on job processed: '+str(job['id']),flush=True)
         except (psycopg.Error,ClientError,BotoCoreError,HTTPException):
             print('Worker services temporarily unavailable; queued jobs are preserved.',flush=True)
-        if once: return
+        if once or stop_requested():
+            return
         time.sleep(3)
