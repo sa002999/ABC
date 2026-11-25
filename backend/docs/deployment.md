@@ -60,7 +60,7 @@ gcloud iam workload-identity-pools create-cred-config "$PoolPath/providers/$Prov
 ### 建立 SSM 部署文件與 IAM 角色
 
 1. 確認 EC2 的 SSM Agent 是 3.3.2746.0 或更新版本，以支援 `ENV_VAR` 插值。EC2 需有可讀取 GitHub `origin` 的 Git checkout、`backend/.venv`（Python 3.13）、migration 可讀取的 runtime 設定，以及 API 與 worker 的 systemd units。
-2. 複製 [SSM 文件範本](../deploy/ssm-development.yml)，替換部署帳號、checkout 絕對路徑與兩個 systemd unit 名稱。在 EC2 所在的 AWS 帳戶和區域將其註冊為名稱 `KinuTabi-DeployBackendDevelopment` 的 Command 文件，使用 YAML 格式。文件透過 `runuser` 切換為部署帳號。該帳號需能非互動式讀取 GitHub `origin`、寫入 checkout 與 venv，並能使用 `sudo -n systemctl restart` 重啟這兩個 units。
+2. 複製 [SSM 文件範本](../deploy/ssm-development.yml)，填入部署帳號、checkout 絕對路徑及兩個 systemd unit 名稱。以部署帳號在 EC2 的 `backend` 目錄執行 `.venv/bin/python -m pip --version`。若虛擬環境缺少 pip，先執行 `.venv/bin/python -m ensurepip`，再重新確認。部署會使用該虛擬環境的 pip 安裝依賴。更新已註冊的文件時，請將新版設為 Default version，workflow 會使用預設版本。在 EC2 所在的 AWS 帳戶和區域將其註冊為名稱 `KinuTabi-DeployBackendDevelopment` 的 Command 文件，使用 YAML 格式。文件透過 `runuser` 切換為部署帳號。該帳號需能非互動式讀取 GitHub `origin`、寫入 checkout 與 venv，並能使用 `sudo -n systemctl restart` 重啟這兩個 units。
 3. 在 GitHub 建立 `backend-development` Environment，將允許部署的分支設成 `development`。在 AWS IAM 使用 GitHub OIDC provider `token.actions.githubusercontent.com`，建立以 `sts:AssumeRoleWithWebIdentity` 取得的部署角色。信任政策以 `StringEquals` 限定 `token.actions.githubusercontent.com:aud` 為 `sts.amazonaws.com`，並限定 `token.actions.githubusercontent.com:sub` 為 `repo:OWNER/REPO:environment:backend-development`，其中 `OWNER/REPO` 要換成此 workflow 所在的 GitHub repository。使用 Environment 時，OIDC subject 裡的分支限制由 GitHub Environment 的分支規則實施。
 4. 在部署角色的權限政策授予下列兩項。SSM 文件由管理者註冊與更新，部署角色只需要發送命令及讀取結果。
 

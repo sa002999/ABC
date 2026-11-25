@@ -1,26 +1,27 @@
-schemaVersion: '2.2'
+schemaVersion: "2.2"
 description: Deploy the tested KINU TABI development commit on EC2
 parameters:
   CommitSha:
     type: String
-    allowedPattern: '^[0-9a-f]{40}$'
+    allowedPattern: "^[0-9a-f]{40}$"
     interpolationType: ENV_VAR
 mainSteps:
   - action: aws:runShellScript
     name: deployBackend
     inputs:
-      timeoutSeconds: '1200'
+      timeoutSeconds: "1200"
       runCommand:
         - |
           set -eu
           : "${SSM_CommitSha:?Update SSM Agent to support ENV_VAR interpolation}"
           cd /
-          # Replace these four values before registering the document.
-          runuser -u 'REPLACE_DEPLOY_USER' -- /bin/bash -s -- "$SSM_CommitSha" <<'DEPLOY'
+          # Replace these values before registering the document.
+          runuser -u 'ubuntu' -- /bin/bash -s -- "$SSM_CommitSha" <<'DEPLOY'
           set -euo pipefail
-          repo_dir='/REPLACE_CHECKOUT_PATH'
-          api_service='REPLACE_API.service'
-          worker_service='REPLACE_WORKER.service'
+          repo_dir='/opt/kinu-tabi'
+          python_bin="$repo_dir/backend/.venv/bin/python"
+          api_service='kinu-tabi-api.service'
+          worker_service='kinu-tabi-worker.service'
           commit_sha=$1
           [[ "$commit_sha" =~ ^[0-9a-f]{40}$ ]]
           export GIT_TERMINAL_PROMPT=0
@@ -40,11 +41,15 @@ mainSteps:
             echo "EC2 checkout has uncommitted tracked changes." >&2
             exit 1
           fi
+          if ! "$python_bin" -m pip --version; then
+            echo "Initialize pip in the backend venv as the deployment user: $python_bin -m ensurepip" >&2
+            exit 1
+          fi
 
           git switch --detach --no-overwrite-ignore "$commit_sha"
           cd backend
-          .venv/bin/python -m pip install -r requirements.txt
-          .venv/bin/python manage.py migrate
+          "$python_bin" -m pip install -r requirements.txt
+          "$python_bin" manage.py migrate
           sudo -n systemctl restart "$api_service" "$worker_service"
           systemctl is-active --quiet "$api_service"
           systemctl is-active --quiet "$worker_service"
